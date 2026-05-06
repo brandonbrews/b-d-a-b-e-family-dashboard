@@ -3,52 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ page.title }} | Family Dash</title>
+    <title>{{ page.title }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;700;900&display=swap" rel="stylesheet">
     <style>
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: 'Montserrat', sans-serif; background: #000; color: #fff; overflow: hidden; }
-        
-        /* Fixed Top Navigation */
         .family-nav {
             position: fixed; top: 30px; left: 50%; transform: translateX(-50%);
             background: rgba(0,0,0,0.5); backdrop-filter: blur(15px);
             border-radius: 60px; padding: 12px 40px; 
             display: flex; justify-content: space-between; align-items: center; 
-            z-index: 1000; border: 1px solid rgba(255,255,255,0.1);
-            min-width: 700px;
+            z-index: 1000; border: 1px solid rgba(255,255,255,0.1); min-width: 700px;
         }
-
         .family-logo { display: flex; align-items: center; gap: 15px; }
-        .family-initial {
-            font-weight: 900; font-size: 1.3rem; color: #000;
-            background: #fff; border-radius: 50%; width: 36px; height: 36px;
-            display: flex; align-items: center; justify-content: center;
-        }
+        .family-initial { font-weight: 900; font-size: 1.3rem; color: #000; background: #fff; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; }
         .family-name { font-weight: 700; font-size: 1.1rem; letter-spacing: 2px; text-transform: uppercase; }
-
         .nav-links { display: flex; gap: 25px; }
         .nav-item { color: white; text-decoration: none; font-weight: 700; font-size: 0.9rem; opacity: 0.6; transition: 0.3s; text-transform: uppercase; }
         .nav-item:hover { opacity: 1; }
-
         .content-area { height: 100vh; width: 100vw; position: relative; }
     </style>
 </head>
 <body>
     <nav class="family-nav">
-        <div class="family-logo">
-            <div class="family-initial">H</div>
-            <div class="family-name">Horn Family</div>
-        </div>
+        <div class="family-logo"><div class="family-initial">H</div><div class="family-name">Horn Family</div></div>
         <div class="nav-links">
             <a href="{{ site.baseurl }}/" class="nav-item">Home</a>
             <a href="{{ site.baseurl }}/calendar" class="nav-item">Calendar</a>
             <a href="{{ site.baseurl }}/chores" class="nav-item">Chores</a>
             <a href="{{ site.baseurl }}/map" class="nav-item">Map</a>
-            <a href="{{ site.baseurl }}/presentations" class="nav-item">Slides</a>
         </div>
     </nav>
-    <div class="content-area">
-        {{ content }}
-    </div>
+    <div class="content-area">{{ content }}</div>
 </body>
 </html>
