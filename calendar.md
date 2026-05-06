@@ -6,7 +6,7 @@ title: Family Calendar
     /* This wrapper forces the calendar into Dark Mode */
     .calendar-wrapper {
         width: 100%;
-        height: 100vh;
+        height: 98vh;
         background-color: #000; /* Keeps the background black while loading */
         overflow: hidden;
     }
