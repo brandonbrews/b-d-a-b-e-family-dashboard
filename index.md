@@ -36,10 +36,10 @@ title: Home
 
 <div class="bottom-ui">
     <div class="weather-box">
-        <a class="weatherwidget-io" href="https://forecast7.com/en/47d17n122d53/lakewood/" 
-           data-label_1="LAKEWOOD" data-label_2="WASHINGTON" data-font="Montserrat" 
-           data-icons="Climacons Animated" data-theme="pure" data-basecolor="transparent" 
-           data-textcolor="#ffffff">LAKEWOOD WA</a>
+        <a class="weatherwidget-io" href="https://forecast7.com/en/47d17n122d52/lakewood/?unit=us" data-label_1="LAKEWOOD" data-label_2="WEATHER" data-icons="Climacons Animated" data-theme="weather_one" >LAKEWOOD WEATHER</a>
+<script>
+!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
+</script>
     </div>
 
     <div class="clock-box">
