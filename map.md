@@ -2,4 +2,4 @@
 layout: default
 title: World Map
 ---
-<iframe width="100%" height="100%" frameborder="0" style="border:0" src="https://www.google.com/maps/@47.1456004,-122.5429591,14.5z?entry=ttu&g_ep=EgoyMDI2MDUwMi4wIKXMDSoASAFQAw%3D%3D" allowfullscreen></iframe>
+<iframe src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d21710.09442753998!2d-122.54391445!3d47.1429325!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1778096895550!5m2!1sen!2sus" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"> allowfullscreen></iframe>
