@@ -18,7 +18,7 @@ title: Family Calendar
         
         /* THE DARK MODE MAGIC */
         /* Invert flips white to black, hue-rotate fixes the colors so they aren't 'neon' */
-        filter: invert(90%) hue-rotate(90deg) brightness(1.1);
+        filter: invert(90%) hue-rotate(270deg) brightness(1.1);
         
         /* Smooths out the edges on high-res displays */
         -webkit-font-smoothing: antialiased;
