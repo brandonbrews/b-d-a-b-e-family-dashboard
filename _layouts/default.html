@@ -8,27 +8,29 @@
     <style>
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: 'Montserrat', sans-serif; background: #000; color: #fff; overflow: hidden; }
         
-        /* Top Navigation */
+        /* Top Navigation: Modern & Balanced */
         .family-nav {
             position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
-            background: rgba(0,0,0,0.5); backdrop-filter: blur(12px);
-            border-radius: 50px; padding: 10px 35px; 
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(15px);
+            border-radius: 60px; padding: 12px 40px; 
             display: flex; justify-content: space-between; align-items: center; 
             z-index: 1000; border: 1px solid rgba(255,255,255,0.1);
-            min-width: 650px;
+            min-width: 700px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }
 
-        .family-logo { display: flex; align-items: center; gap: 12px; }
+        /* The Logo Section */
+        .family-logo { display: flex; align-items: center; gap: 15px; }
         .family-initial {
-            font-weight: 900; font-size: 1.2rem; color: #000;
-            background: #fff; border-radius: 50%; width: 32px; height: 32px;
+            font-weight: 900; font-size: 1.3rem; color: #000;
+            background: #fff; border-radius: 50%; width: 36px; height: 36px;
             display: flex; align-items: center; justify-content: center;
         }
-        .family-name { font-weight: 700; font-size: 1rem; letter-spacing: 2px; text-transform: uppercase; }
+        .family-name { font-weight: 700; font-size: 1.1rem; letter-spacing: 2px; text-transform: uppercase; }
 
-        .nav-links { display: flex; gap: 20px; }
-        .nav-item { color: white; text-decoration: none; font-weight: 700; font-size: 0.9rem; opacity: 0.5; transition: 0.3s; text-transform: uppercase; }
-        .nav-item:hover { opacity: 1; }
+        /* The Links Section */
+        .nav-links { display: flex; gap: 25px; }
+        .nav-item { color: white; text-decoration: none; font-weight: 700; font-size: 0.9rem; opacity: 0.6; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; }
+        .nav-item:hover { opacity: 1; transform: translateY(-1px); }
 
         .content-area { height: 100vh; width: 100vw; position: relative; }
     </style>
