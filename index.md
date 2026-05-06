@@ -33,29 +33,25 @@ title: Home
     #date-display { font-size: 2.2rem; font-weight: 300; text-transform: uppercase; letter-spacing: 5px; opacity: 0.8; }
 </style>
 
-<!-- BACKGROUND PHOTOS -->
 <div id="photo-bg">
-    <script src="https://cdn.jsdelivr.net/npm/publicalbum@latest/embed-ui.min.js" async></script>
     <div class="pa-carousel-widget" 
          data-link="https://photos.app.goo.gl/R5JTm4dMNEbHEvjm7"
          data-delay="10" data-repeat="true" style="width:100%; height:100%; display:none;">
         <object data="https://photos.app.goo.gl/R5JTm4dMNEbHEvjm7"></object>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/publicalbum@latest/embed-ui.min.js"></script>
 </div>
 
 <div class="overlay-vignette"></div>
 
-<!-- LOWER UI -->
 <div class="bottom-ui">
-    <!-- WEATHER (LEFT) -->
     <div class="weather-box">
-        <a class="weatherwidget-io" href="https://forecast7.com/en/47d17n122d53/98498/" 
+        <a class="weatherwidget-io" href="https://forecast7.com/en/47d17n122d53/lakewood/" 
            data-label_1="LAKEWOOD" data-label_2="WASHINGTON" data-font="Montserrat" 
            data-icons="Climacons Animated" data-theme="pure" data-basecolor="transparent" 
            data-textcolor="#ffffff">LAKEWOOD WA</a>
     </div>
 
-    <!-- CLOCK (RIGHT) -->
     <div class="clock-box">
         <div id="time-display">00:00</div>
         <div id="date-display">LOADING</div>
@@ -71,7 +67,7 @@ title: Home
         const ampm = h >= 12 ? 'PM' : 'AM';
         h = h % 12 || 12;
         m = m < 10 ? '0' + m : m;
-        document.getElementById('time-display').textContent = `${h}:${m}`; // Removed ampm for cleaner look, add if desired
+        document.getElementById('time-display').textContent = `${h}:${m}`; 
         
         const options = { weekday: 'long', month: 'short', day: 'numeric' };
         document.getElementById('date-display').textContent = now.toLocaleDateString('en-US', options);
@@ -79,14 +75,8 @@ title: Home
     setInterval(updateClock, 1000);
     updateClock();
 
-    // 2. WEATHER & PHOTO LOADER (Forces scripts to run after content loads)
+    // 2. WEATHER LOADER 
     window.onload = function() {
-        // Load Weather
         !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
-        
-        // Refresh PublicAlbum if it's stuck
-        if(window.PA && window.PA.carousel) {
-            window.PA.carousel.load();
-        }
     };
 </script>
