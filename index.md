@@ -78,7 +78,7 @@ title: Home
     var cloudName = 'dybmaxwvb'; 
     var tagName = 'dashboard';
     // Path check: ensure this file exists in assets/img/ and matches case exactly
-    var crestPath = 'assets/img/family-crest.png'; 
+    var crestPath = 'assets/img/family-crest-metal-on-wood.png'; 
     
     var photoUrls = [];
     var activeBg = 1;
