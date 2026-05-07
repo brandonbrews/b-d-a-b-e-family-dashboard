@@ -47,66 +47,37 @@ title: Home
 </div>
 
 <script>
-    const albumUrl = 'https://photos.app.goo.gl/R5JTm4dMNEbHEvjm7';
-    let photoArray = [];
-    let currentIndex = 0;
+    const cloudName = 'dybmaxwvb'; // Put your Cloudinary name here
+    const folderName = 'dashboard'; 
+    let photoUrls = [];
     let activeBg = 1;
 
-    async function fetchPhotos() {
-        // Added a 3rd proxy and changed logic to use .text() to avoid "Not valid JSON" errors
-        const proxies = [
-            'https://api.allorigins.win/get?url=',
-            'https://corsproxy.io/?',
-            'https://thingproxy.freeboard.io/fetch/'
-        ];
+    async function fetchCloudinaryPhotos() {
+        try {
+            // This fetches the list of all images in your 'dashboard' tag/folder
+            const response = await fetch(`https://res.cloudinary.com/${cloudName}/image/list/${folderName}.json`);
+            const data = await response.json();
+            
+            photoUrls = data.resources.map(res => 
+                `https://res.cloudinary.com/${cloudName}/image/upload/q_auto,f_auto,w_1920,c_limit/${res.public_id}.${res.format}`
+            );
 
-        for (let proxy of proxies) {
-            try {
-                console.log(`Trying proxy: ${proxy}`);
-                const response = await fetch(proxy + encodeURIComponent(albumUrl));
-                
-                // We use .text() because proxies often return raw HTML which crashes .json()
-                let html = "";
-                if (proxy.includes("allorigins")) {
-                    const data = await response.json();
-                    html = data.contents;
-                } else {
-                    html = await response.text();
-                }
-
-                if (!html || html.includes("Oops") || html.includes("Too Large")) {
-                    throw new Error("Proxy response invalid or too large");
-                }
-
-                // Regex to find the images in the Google Photos page source
-                const regex = /"(https:\/\/lh3\.googleusercontent\.com\/pw\/[a-zA-Z0-9\-_]+)"/g;
-                let match;
-                const seen = new Set();
-                
-                while ((match = regex.exec(html)) !== null) {
-                    const url = match[1] + "=w1920-h1080";
-                    if (!seen.has(url)) { photoArray.push(url); seen.add(url); }
-                }
-
-                if (photoArray.length > 0) {
-                    console.log(`Success! Found ${photoArray.length} photos.`);
-                    startSlideshow();
-                    return; 
-                }
-            } catch (e) {
-                console.warn(`Proxy failed: ${proxy}`, e);
+            if (photoUrls.length > 0) {
+                updateBackground();
+                setInterval(updateBackground, 30000); // Change every 30 seconds
             }
+        } catch (e) {
+            console.error("Cloudinary fetch failed. Make sure 'Resource List' is enabled in settings.", e);
         }
     }
 
-    function startSlideshow() {
-        updateBackground();
-        setInterval(updateBackground, 20000); // 20 second rotation
-    }
-
     function updateBackground() {
-        if (photoArray.length === 0) return;
-        const url = photoArray[currentIndex];
+        if (photoUrls.length === 0) return;
+        
+        // Randomly pick a photo from the 300+ available
+        const randomIndex = Math.floor(Math.random() * photoUrls.length);
+        const url = photoUrls[randomIndex];
+        
         const nextBg = activeBg === 1 ? 2 : 1;
         const currentEl = document.getElementById(`photo-bg-${activeBg}`);
         const nextEl = document.getElementById(`photo-bg-${nextBg}`);
@@ -118,23 +89,20 @@ title: Home
             nextEl.style.opacity = 1;
             currentEl.style.opacity = 0;
             activeBg = nextBg;
-            currentIndex = (currentIndex + 1) % photoArray.length;
         };
     }
 
-    // FIXED CLOCK LOGIC
     function updateClock() {
         const now = new Date();
         let h = now.getHours() % 12 || 12;
         let m = now.getMinutes().toString().padStart(2, '0');
-        // The parentheses below ensure the full time string is built before being set
         document.getElementById('time-display').textContent = h + ":" + m;
         document.getElementById('date-display').textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
     }
 
     updateClock();
     setInterval(updateClock, 1000);
-    fetchPhotos();
+    fetchCloudinaryPhotos();
 
     !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
 </script>
