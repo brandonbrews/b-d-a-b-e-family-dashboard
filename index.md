@@ -18,18 +18,6 @@ title: Home
         z-index: 3; pointer-events: none;
     }
 
-    /* Main Navigation Bar */
-    .nav-container {
-        position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
-        z-index: 20; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px);
-        padding: 10px 40px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1);
-        display: flex; align-items: center; gap: 30px;
-    }
-    .nav-logo { font-weight: 900; letter-spacing: 2px; color: #fff; text-decoration: none; font-size: 1.2rem; }
-    .nav-links { display: flex; gap: 20px; }
-    .nav-links a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; transition: 0.3s; }
-    .nav-links a:hover { color: #fff; }
-
     /* UI Placement */
     .bottom-ui {
         position: absolute; bottom: 60px; left: 0; width: 100%;
@@ -66,17 +54,6 @@ title: Home
 <div id="photo-bg-1"></div>
 <div id="photo-bg-2"></div>
 <div class="overlay-vignette"></div>
-
-<div class="nav-container">
-    <a href="/" class="nav-logo">HORN FAMILY</a>
-    <div class="nav-links">
-        <a href="/">Home</a>
-        <a href="/calendar">Calendar</a>
-        <a href="/chores">Chores</a>
-        <a href="/map">Map</a>
-        <a href="/presentations">Presentations</a>
-    </div>
-</div>
 
 <div class="bg-selector">
     <button class="btn-mode" id="btn-family" onclick="setMode('family')">Family Photos</button>
