@@ -12,7 +12,6 @@ title: Home
     }
     #photo-bg-2 { opacity: 0; }
     
-    /* Overlay for readability */
     .overlay-vignette {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%;
         background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.8) 100%);
@@ -33,20 +32,21 @@ title: Home
     #time-display { font-size: 10rem; font-weight: 900; line-height: 0.8; margin: 0; letter-spacing: -6px; }
     #date-display { font-size: 2.4rem; font-weight: 300; text-transform: uppercase; letter-spacing: 6px; opacity: 0.8; }
 
-    /* The Selector Toggle */
+    /* The Selector Toggle - Moved to Top Right */
     .bg-selector {
-        position: fixed; top: 100px; right: 30px; z-index: 1000;
-        display: flex; flex-direction: column; gap: 10px;
+        position: fixed; top: 20px; right: 20px; z-index: 1000;
+        display: flex; flex-direction: column; gap: 8px;
         background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);
-        padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);
+        padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
         opacity: 0; transition: opacity 0.5s;
     }
-    body:hover .bg-selector { opacity: 1; } /* Only shows when you move the mouse/touch */
+    body:hover .bg-selector { opacity: 1; }
+    
     .btn-mode {
         background: rgba(255,255,255,0.1); color: white; border: none;
-        padding: 8px 15px; border-radius: 8px; cursor: pointer;
-        font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;
-        transition: 0.3s;
+        padding: 8px 15px; border-radius: 6px; cursor: pointer;
+        font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px;
+        transition: 0.3s; text-align: left; width: 140px;
     }
     .btn-mode.active { background: #fff; color: #000; font-weight: 900; }
 </style>
@@ -56,9 +56,9 @@ title: Home
 <div class="overlay-vignette"></div>
 
 <div class="bg-selector">
-    <button class="btn-mode" onclick="setMode('family')">Family Photos</button>
-    <button class="btn-mode" onclick="setMode('nature')">Daily Nature</button>
-    <button class="btn-mode" onclick="setMode('crest')">Family Crest</button>
+    <button class="btn-mode" id="btn-family" onclick="setMode('family')">Family Photos</button>
+    <button class="btn-mode" id="btn-nature" onclick="setMode('nature')">Daily Nature</button>
+    <button class="btn-mode" id="btn-crest" onclick="setMode('crest')">Family Crest</button>
 </div>
 
 <div class="bottom-ui">
@@ -75,38 +75,34 @@ title: Home
 </div>
 
 <script>
-    const cloudName = 'YOUR_CLOUD_NAME'; 
+    const cloudName = 'dybmaxwvb'; 
     const tagName = 'dashboard';
-    const crestPath = 'assets/img/family-crest.png'; // Path to your crest
+    const crestPath = '/assets/img/family-crest.png'; 
     
     let photoUrls = [];
     let activeBg = 1;
     let slideshowInterval = null;
 
-    // 1. Core Mode Logic
     function setMode(mode) {
         localStorage.setItem('dashboard-bg-mode', mode);
         
-        // Update Button UI
-        document.querySelectorAll('.btn-mode').forEach(btn => {
-            btn.classList.remove('active');
-            if(btn.innerText.toLowerCase().includes(mode)) btn.classList.add('active');
-        });
+        // Fix the highlight bug by checking exact ID instead of text content
+        document.querySelectorAll('.btn-mode').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`btn-${mode}`).classList.add('active');
 
-        // Clear existing intervals
         if (slideshowInterval) clearInterval(slideshowInterval);
 
         if (mode === 'family') {
             fetchCloudinary();
         } else if (mode === 'nature') {
-            const natureUrl = `https://source.unsplash.com/featured/1920x1080/?nature,landscape,mountains&sig=${new Date().getDay()}`;
+            // Using a high-res nature source that updates daily
+            const natureUrl = `https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=1920&auto=format&fit=crop`;
             applyBackground(natureUrl);
         } else if (mode === 'crest') {
             applyBackground(crestPath);
         }
     }
 
-    // 2. Background Application (with crossfade)
     function applyBackground(url) {
         const nextBg = activeBg === 1 ? 2 : 1;
         const currentEl = document.getElementById(`photo-bg-${activeBg}`);
@@ -122,10 +118,11 @@ title: Home
         };
     }
 
-    // 3. Cloudinary Fetch
     async function fetchCloudinary() {
         try {
             const response = await fetch(`https://res.cloudinary.com/${cloudName}/image/list/${tagName}.json?cb=${Date.now()}`);
+            if (!response.ok) throw new Error("Cloudinary error: Check Resource List settings.");
+            
             const data = await response.json();
             photoUrls = data.resources.map(res => 
                 `https://res.cloudinary.com/${cloudName}/image/upload/q_auto,f_auto,w_1920,c_limit/${res.public_id}.${res.format}`
@@ -134,15 +131,19 @@ title: Home
                 rotateFamilyPhoto();
                 slideshowInterval = setInterval(rotateFamilyPhoto, 30000);
             }
-        } catch (e) { console.error("Cloudinary failed", e); }
+        } catch (e) { 
+            console.error("Cloudinary failed", e);
+            // Fallback to a placeholder if fetch fails
+            applyBackground('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1920');
+        }
     }
 
     function rotateFamilyPhoto() {
+        if (photoUrls.length === 0) return;
         const url = photoUrls[Math.floor(Math.random() * photoUrls.length)];
         applyBackground(url);
     }
 
-    // 4. Clock Logic
     function updateClock() {
         const now = new Date();
         let h = now.getHours() % 12 || 12;
@@ -151,14 +152,10 @@ title: Home
         document.getElementById('date-display').textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
     }
 
-    // Initialize
     updateClock();
     setInterval(updateClock, 1000);
     
-    // Load saved mode or default to family
     const savedMode = localStorage.getItem('dashboard-bg-mode') || 'family';
     setMode(savedMode);
 
-    // Weather Widget
-    !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
-</script>
+    !
