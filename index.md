@@ -4,6 +4,7 @@ title: Home
 ---
 
 <style>
+    /* Background Layers */
     #photo-bg-1, #photo-bg-2 {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%;
         background-size: cover; background-position: center;
@@ -17,6 +18,19 @@ title: Home
         z-index: 3; pointer-events: none;
     }
 
+    /* Main Navigation Bar */
+    .nav-container {
+        position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
+        z-index: 20; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px);
+        padding: 10px 40px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1);
+        display: flex; align-items: center; gap: 30px;
+    }
+    .nav-logo { font-weight: 900; letter-spacing: 2px; color: #fff; text-decoration: none; font-size: 1.2rem; }
+    .nav-links { display: flex; gap: 20px; }
+    .nav-links a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; transition: 0.3s; }
+    .nav-links a:hover { color: #fff; }
+
+    /* UI Placement */
     .bottom-ui {
         position: absolute; bottom: 60px; left: 0; width: 100%;
         display: flex; justify-content: space-between; align-items: flex-end;
@@ -46,13 +60,23 @@ title: Home
         font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px;
         transition: 0.3s; text-align: left; width: 140px;
     }
-    /* Fixed the double-highlighting bug */
     .btn-mode.active { background: #fff !important; color: #000 !important; font-weight: 900; }
 </style>
 
 <div id="photo-bg-1"></div>
 <div id="photo-bg-2"></div>
 <div class="overlay-vignette"></div>
+
+<div class="nav-container">
+    <a href="/" class="nav-logo">HORN FAMILY</a>
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/calendar">Calendar</a>
+        <a href="/chores">Chores</a>
+        <a href="/map">Map</a>
+        <a href="/presentations">Presentations</a>
+    </div>
+</div>
 
 <div class="bg-selector">
     <button class="btn-mode" id="btn-family" onclick="setMode('family')">Family Photos</button>
@@ -74,15 +98,15 @@ title: Home
 </div>
 
 <script>
-    // 1. Core Config
     var cloudName = 'dybmaxwvb'; 
     var tagName = 'dashboard';
-    var crestPath = '/assets/img/family-crest.png'; 
+    // Path check: ensure this file exists in assets/img/ and matches case exactly
+    var crestPath = 'assets/img/family-crest.png'; 
+    
     var photoUrls = [];
     var activeBg = 1;
     var slideshowInterval = null;
 
-    // 2. Immediate Start: Clock
     function updateClock() {
         var now = new Date();
         var h = now.getHours() % 12 || 12;
@@ -93,7 +117,6 @@ title: Home
     updateClock();
     setInterval(updateClock, 1000);
 
-    // 3. Background Logic
     function applyBackground(url) {
         var nextBg = activeBg === 1 ? 2 : 1;
         var currentEl = document.getElementById('photo-bg-' + activeBg);
@@ -107,25 +130,25 @@ title: Home
             currentEl.style.opacity = 0;
             activeBg = nextBg;
         };
+        img.onerror = function() {
+            console.error("Failed to load background: " + url);
+        };
     }
 
     async function fetchCloudinary() {
         try {
             var listUrl = 'https://res.cloudinary.com/' + cloudName + '/image/list/' + tagName + '.json?cb=' + Date.now();
             var response = await fetch(listUrl);
-            if (!response.ok) throw new Error("Cloudinary list fetch failed.");
-            
+            if (!response.ok) throw new Error("Cloudinary fetch failed.");
             var data = await response.json();
             photoUrls = data.resources.map(function(res) {
                 return 'https://res.cloudinary.com/' + cloudName + '/image/upload/q_auto,f_auto,w_1920,c_limit/' + res.public_id + '.' + res.format;
             });
-            
             if (photoUrls.length > 0) {
                 rotateFamilyPhoto();
                 slideshowInterval = setInterval(rotateFamilyPhoto, 30000);
             }
         } catch (e) {
-            console.error(e);
             applyBackground('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1920');
         }
     }
@@ -138,12 +161,8 @@ title: Home
 
     function setMode(mode) {
         localStorage.setItem('dashboard-bg-mode', mode);
-        
-        // Robust UI highlight fix
         var buttons = document.querySelectorAll('.btn-mode');
-        for (var i = 0; i < buttons.length; i++) {
-            buttons[i].classList.remove('active');
-        }
+        for (var i = 0; i < buttons.length; i++) { buttons[i].classList.remove('active'); }
         document.getElementById('btn-' + mode).classList.add('active');
 
         if (slideshowInterval) clearInterval(slideshowInterval);
@@ -153,14 +172,13 @@ title: Home
         } else if (mode === 'nature') {
             applyBackground('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=1920&auto=format&fit=crop');
         } else if (mode === 'crest') {
+            // Note: If this fails, check your console (F12) for the specific error path
             applyBackground(crestPath);
         }
     }
 
-    // 4. Initialize Mode
     var savedMode = localStorage.getItem('dashboard-bg-mode') || 'family';
     setMode(savedMode);
 
-    // 5. Weather Widget Loader (Kept at bottom to avoid blocking)
     !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
 </script>
