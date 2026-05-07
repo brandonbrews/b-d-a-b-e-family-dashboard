@@ -6,12 +6,12 @@ title: Chores
 <style>
     .fullscreen-iframe {
         position: absolute;
-        top: 0;
+        top: 50px; /* Pushes the start of the iframe down below the nav */
         left: 0;
         width: 100%;
-        height: 100vh; /* 100% of the screen's height */
-        border: none; /* Removes the ugly default browser border */
-        z-index: 1; /* Keeps the iframe underneath your z-index: 100 navigation bar */
+        height: calc(100vh - 50px); /* Calculates exactly how much screen is left */
+        border: none;
+        z-index: 1;
     }
 </style>
 
