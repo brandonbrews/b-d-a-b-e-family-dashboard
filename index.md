@@ -77,7 +77,7 @@ title: Home
 <script>
     const cloudName = 'YOUR_CLOUD_NAME'; 
     const tagName = 'dashboard';
-    const crestPath = '/assets/img/family-crest.png'; // Path to your crest
+    const crestPath = 'assets/img/family-crest.png'; // Path to your crest
     
     let photoUrls = [];
     let activeBg = 1;
