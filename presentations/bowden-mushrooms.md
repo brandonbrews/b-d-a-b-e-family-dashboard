@@ -2,7 +2,7 @@
 layout: default
 title: Bowden's Mushroom Growing
 author: Bo
-thumbnail: /assets/img/mushroom-growing.jpg
+thumbnail: /assets/img/mushroom-growing.JPG
 ---
 
 <style>
