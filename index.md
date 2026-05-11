@@ -6,7 +6,7 @@ title: Home
 <style>
     /* Background Layers */
     #photo-bg-1, #photo-bg-2 {
-        position: absolute; top: 0; left: 0; /* width: 100%; */ height: 100%;
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
         background-size: cover; background-position: center;
         transition: opacity 2s ease-in-out; z-index: 1; background-color: #000;
     }
@@ -44,8 +44,8 @@ title: Home
     
     .btn-mode {
         background: rgba(255,255,255,0.1); color: white; border: none;
-        padding: 8px 30px; border-radius: 6px; cursor: pointer;
-        font-size: 1rem; text-transform: uppercase; letter-spacing: 1px;
+        padding: 8px 15px; border-radius: 6px; cursor: pointer;
+        font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px;
         transition: 0.3s; text-align: left; width: 140px;
     }
     .btn-mode.active { background: #fff !important; color: #000 !important; font-weight: 900; }
