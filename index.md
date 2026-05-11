@@ -34,7 +34,7 @@ title: Home
 
     /* The Selector Toggle - Top Right */
     .bg-selector {
-        position: fixed; top: 20px; right: 20px; z-index: 1000;
+        position: fixed; top: 30px; right: 30px; z-index: 1000;
         display: flex; flex-direction: column; gap: 8px;
         background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);
         padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
@@ -45,7 +45,7 @@ title: Home
     .btn-mode {
         background: rgba(255,255,255,0.1); color: white; border: none;
         padding: 8px 15px; border-radius: 6px; cursor: pointer;
-        font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px;
+        font-size: 1rem; text-transform: uppercase; letter-spacing: 1px;
         transition: 0.3s; text-align: left; width: 140px;
     }
     .btn-mode.active { background: #fff !important; color: #000 !important; font-weight: 900; }
