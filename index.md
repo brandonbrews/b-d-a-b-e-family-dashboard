@@ -42,11 +42,35 @@ title: Home
     }
     body:hover .bg-selector { opacity: 1; }
 
-    /* Manual Navigation Controls */
-    <div class="photo-nav">
-        <button onclick="prevPhoto()" class="nav-arrow">❮</button>
-        <button onclick="nextPhoto()" class="nav-arrow">❯</button>
-    </div>
+    .photo-nav {
+        position: absolute;
+        bottom: 220px; /* Sits above the clock */
+        right: 70px;
+        display: flex;
+        gap: 15px;
+        z-index: 100;
+    }
+    
+    .nav-arrow {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 1.2rem;
+        transition: 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .nav-arrow:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.1);
+    }
     
     .btn-mode {
         background: rgba(255,255,255,0.1); color: white; border: none;
@@ -67,6 +91,12 @@ title: Home
     <button class="btn-mode" id="btn-crest" onclick="setMode('crest')">Family Crest</button>
 </div>
 
+/* Manual Navigation Controls */
+<div class="photo-nav">
+    <button onclick="prevPhoto()" class="nav-arrow">❮</button>
+    <button onclick="nextPhoto()" class="nav-arrow">❯</button>
+</div>
+    
 <div class="bottom-ui">
     <div class="weather-box">
         <a class="weatherwidget-io" href="https://forecast7.com/en/47d17n122d52/lakewood/?unit=us" 
