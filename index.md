@@ -41,6 +41,12 @@ title: Home
         opacity: 0; transition: opacity 0.5s;
     }
     body:hover .bg-selector { opacity: 1; }
+
+    /* Manual Navigation Controls */
+    <div class="photo-nav">
+        <button onclick="prevPhoto()" class="nav-arrow">❮</button>
+        <button onclick="nextPhoto()" class="nav-arrow">❯</button>
+    </div>
     
     .btn-mode {
         background: rgba(255,255,255,0.1); color: white; border: none;
