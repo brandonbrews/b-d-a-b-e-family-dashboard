@@ -166,10 +166,35 @@ title: Home
         }
     }
 
+    var currentIndex = 0;
+    
     function rotateFamilyPhoto() {
         if (photoUrls.length === 0) return;
-        var url = photoUrls[Math.floor(Math.random() * photoUrls.length)];
-        applyBackground(url);
+        // Move to next photo automatically
+        currentIndex = (currentIndex + 1) % photoUrls.length;
+        applyBackground(photoUrls[currentIndex]);
+    }
+    
+    function nextPhoto() {
+        if (photoUrls.length === 0) return;
+        // Reset timer so it doesn't auto-swap immediately after click
+        resetSlideshow();
+        currentIndex = (currentIndex + 1) % photoUrls.length;
+        applyBackground(photoUrls[currentIndex]);
+    }
+    
+    function prevPhoto() {
+        if (photoUrls.length === 0) return;
+        resetSlideshow();
+        currentIndex = (currentIndex - 1 + photoUrls.length) % photoUrls.length;
+        applyBackground(photoUrls[currentIndex]);
+    }
+    
+    function resetSlideshow() {
+        if (slideshowInterval) {
+            clearInterval(slideshowInterval);
+            slideshowInterval = setInterval(rotateFamilyPhoto, 30000);
+        }
     }
 
     function setMode(mode) {
