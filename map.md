@@ -7,7 +7,7 @@ title: World Map
   /* Pull the map flush under the nav bar and fill the rest of the screen */
   #map-wrap {
     position: fixed;
-    top: 50px;
+    top: 0px;
     left: 0; right: 0; bottom: 0;
     overflow: hidden;
   }
