@@ -466,7 +466,7 @@ const CAL_COLORS = {
 //  STATE
 // ═══════════════════════════════════════════════════════════════════════════════
 const PX_PER_HOUR = 56;
-let viewMode    = 'week';  // 'week' | 'month'
+let viewMode    = 'month';  // 'week' | 'month'
 let weekOffset  = 0;       // weeks relative to current
 let monthOffset = 0;       // months relative to current
 let allEvents   = [];
