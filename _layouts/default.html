@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{{ page.title }} | Horn Family</title>
+    <title>{{ page.title }}</title>
     <style>
-        /* Global Nav Styling */
+        /* ── RESET ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+
+        /* ── BOTTOM NAV BAR ── */
         .nav-container {
-            position: absolute;
-            top: 30px;
-            left: 70px;
-            /* transform: translateX(-10%); */
-            z-index: 100; /* High z-index to stay above backgrounds */
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
             background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
@@ -21,27 +25,75 @@
             gap: 30px;
             white-space: nowrap;
         }
-        .nav-logo { font-weight: 900; letter-spacing: 2px; color: #fff; text-decoration: none; font-size: 48px; }
-        .nav-links { display: flex; gap: 30px; }
-        .nav-links a { color: rgba(255, 255, 255, 0.7); text-decoration: none; font-size: 1.2rem; font-weight: 700; text-transform: uppercase; transition: 0.3s; }
-        .nav-links a:hover { color: #fff; }
-        baseurl: "/b-d-a-b-e-family-dashboard"
+
+        /* Logo */
+        .nav-logo {
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.4rem;         /* scaled down from 48px — fits the bar */
+            text-transform: uppercase;
+        }
+
+        /* Divider between logo and links */
+        .nav-divider {
+            width: 1px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Page links */
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        .nav-links a:hover,
+        .nav-links a.active { color: #fff; }
     </style>
 </head>
 <body>
 
-    <nav class="nav-container">
-    <a href="/b-d-a-b-e-family-dashboard/" class="nav-logo">HORN FAMILY</a>
-    <div class="nav-links">
-        <a href="/b-d-a-b-e-family-dashboard/">Home</a>
-        <a href="/b-d-a-b-e-family-dashboard/calendar">Calendar</a>
-        <a href="/b-d-a-b-e-family-dashboard/chores">Chores</a>
-        <a href="/b-d-a-b-e-family-dashboard/map">Map</a>
-        <a href="/b-d-a-b-e-family-dashboard/presentations">Presentations</a>
-    </div>
-</nav>
-
     {{ content }}
+
+    <nav class="nav-container">
+        <a href="/b-d-a-b-e-family-dashboard/" class="nav-logo">Horn Family</a>
+        <div class="nav-divider"></div>
+        <div class="nav-links">
+            <a href="/b-d-a-b-e-family-dashboard/">Home</a>
+            <a href="/b-d-a-b-e-family-dashboard/calendar">Calendar</a>
+            <a href="/b-d-a-b-e-family-dashboard/chores">Chores</a>
+            <a href="/b-d-a-b-e-family-dashboard/map">Map</a>
+        </div>
+    </nav>
+
+    <script>
+        // Highlight the active nav link based on current path
+        (function() {
+            var path  = window.location.pathname;
+            var links = document.querySelectorAll('.nav-links a');
+            links.forEach(function(a) {
+                var href = a.getAttribute('href');
+                // Home: exact match only; others: endsWith
+                var isHome  = href.endsWith('/b-d-a-b-e-family-dashboard/') || href === '/b-d-a-b-e-family-dashboard/';
+                var isCurrent = isHome
+                    ? (path === '/b-d-a-b-e-family-dashboard/' || path === '/b-d-a-b-e-family-dashboard')
+                    : path.startsWith(href);
+                if (isCurrent) a.classList.add('active');
+            });
+        })();
+    </script>
 
 </body>
 </html>
