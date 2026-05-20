@@ -6,7 +6,7 @@ title: Chores
 <style>
     .fullscreen-iframe {
         position: absolute;
-        top: 50px; /* Pushes the start of the iframe down below the nav */
+        top: 0px; 
         left: 0;
         width: 100%;
         height: calc(100vh - 50px); /* Calculates exactly how much screen is left */
@@ -15,4 +15,4 @@ title: Chores
     }
 </style>
 
-<iframe src="https://script.google.com/macros/s/AKfycbwHaJZXWT2vs_qiZfzCgW3EUuSKqNkccTkVOMiKTOrpPtcSRazuFMaIWmFtuJTNVQjV/exec" class="fullscreen-iframe"></iframe>
+<iframe src="https://script.google.com/macros/s/AKfycbyH5AJhu2QqpGwv8Y80elScOQQ6zNOJQqFXlvI0gZoMuSRoiRXelfmy0VU_pya1wlv1/exec" class="fullscreen-iframe"></iframe>
