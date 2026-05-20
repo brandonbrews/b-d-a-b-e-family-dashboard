@@ -1,0 +1,57 @@
+name: Sync Google Photos → Cloudinary
+
+on:
+  # Run automatically every day at 3 AM UTC (7 PM Pacific)
+  schedule:
+    - cron: '0 3 * * *'
+
+  # Also run whenever you push changes to sync_photos.py itself
+  push:
+    paths:
+      - 'sync_photos.py'
+
+  # Allow manual trigger from the GitHub Actions tab
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      # Persist synced_ids.json between runs using cache.
+      # Without this, every run would re-upload everything.
+      - name: Restore sync manifest cache
+        uses: actions/cache@v4
+        with:
+          path: synced_ids.json
+          key: synced-ids-${{ github.run_id }}
+          restore-keys: |
+            synced-ids-
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install \
+            google-auth \
+            google-auth-oauthlib \
+            google-auth-httplib2 \
+            requests \
+            cloudinary
+
+      - name: Run sync
+        env:
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY:    ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+          GOOGLE_ALBUM_ID:       ${{ secrets.GOOGLE_ALBUM_ID }}
+          GOOGLE_TOKEN_JSON:     ${{ secrets.GOOGLE_TOKEN_JSON }}
+          CLOUDINARY_TAG:        dashboard
+          CLOUDINARY_FOLDER:     family-photos
+        run: python sync_photos.py
