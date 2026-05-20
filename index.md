@@ -18,10 +18,51 @@ title: Home
         z-index: 3; pointer-events: none;
     }
 
+    /* ── NATURE PHOTO CAPTION — top-right corner ── */
+    #nature-caption {
+        position: fixed;
+        top: 28px;
+        right: 28px;
+        z-index: 20;
+        text-align: right;
+        opacity: 0;
+        transition: opacity 0.8s ease;
+        pointer-events: none;
+    }
+    #nature-caption.visible { opacity: 1; pointer-events: auto; }
+    #nature-caption .caption-location {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #fff;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        text-shadow: 0 2px 12px rgba(0,0,0,0.7);
+        line-height: 1.2;
+    }
+    #nature-caption .caption-desc {
+        font-size: 1rem;
+        font-weight: 400;
+        color: rgba(255,255,255,0.75);
+        text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+        margin-top: 4px;
+        max-width: 320px;
+        margin-left: auto;
+    }
+    #nature-caption .caption-credit {
+        font-size: 0.8rem;
+        color: rgba(255,255,255,0.45);
+        margin-top: 6px;
+        text-shadow: 0 1px 6px rgba(0,0,0,0.6);
+    }
+    #nature-caption .caption-credit a {
+        color: rgba(255,255,255,0.55);
+        text-decoration: underline;
+    }
+
     /* ── CLOCK / WEATHER — bottom left / right ── */
     .bottom-ui {
         position: fixed;
-        bottom: 110px;          /* sits above the nav bar */
+        bottom: 110px;
         left: 0; width: 100%;
         display: flex; justify-content: space-between; align-items: flex-end;
         padding: 0 70px; z-index: 10;
@@ -40,15 +81,15 @@ title: Home
         letter-spacing: 6px; opacity: 0.8; color: #fff;
     }
 
-    /* ── BG SELECTOR — floats just above the nav bar, centred ── */
+    /* ── BG SELECTOR ── */
     .bg-selector {
         position: fixed;
-        bottom: 96px;           /* snug above the 28px-bottom + ~40px-tall nav */
+        bottom: 96px;
         left: 50%;
         transform: translateX(-50%);
-        z-index: 1001;          /* above nav */
+        z-index: 1001;
         display: flex;
-        flex-direction: row;    /* horizontal pill row */
+        flex-direction: row;
         gap: 6px;
         background: rgba(0, 0, 0, 0.6);
         backdrop-filter: blur(10px);
@@ -56,15 +97,12 @@ title: Home
         padding: 6px 10px;
         border-radius: 50px;
         border: 1px solid rgba(255, 255, 255, 0.1);
-        /* Fade in on hover / touch; always visible on touch devices */
         opacity: 0.25;
         transition: opacity 0.4s;
     }
-    /* Show fully when hovered or when a mode is active */
     .bg-selector:hover,
     .bg-selector:focus-within { opacity: 1; }
 
-    /* Matches the nav link style exactly */
     .btn-mode {
         background: transparent;
         color: rgba(255, 255, 255, 0.7);
@@ -87,7 +125,7 @@ title: Home
         color: #fff;
     }
 
-    /* ── PHOTO NAV ARROWS — left and right edges, vertically centred ── */
+    /* ── PHOTO NAV ARROWS ── */
     .photo-nav-arrow {
         position: fixed;
         top: 50%;
@@ -103,11 +141,9 @@ title: Home
         border-radius: 50%;
         cursor: pointer;
         font-size: 1.5rem;
-        transition: background 0.3s, transform 0.2s;
         display: flex;
         align-items: center;
         justify-content: center;
-        /* Hidden until hover/touch */
         opacity: 0;
         transition: opacity 0.4s, background 0.3s;
         -webkit-tap-highlight-color: transparent;
@@ -118,7 +154,6 @@ title: Home
         background: rgba(255, 255, 255, 0.28);
         opacity: 1;
     }
-    /* Force visible on touch screens that don't support :hover */
     @media (hover: none) {
         .photo-nav-arrow { opacity: 0.5; }
         .bg-selector { opacity: 1; }
@@ -133,7 +168,14 @@ title: Home
 <div id="photo-bg-2"></div>
 <div class="overlay-vignette"></div>
 
-<!-- Photo nav arrows -->
+<!-- Nature photo caption (top-right, only shown in nature mode) -->
+<div id="nature-caption">
+    <div class="caption-location" id="caption-location"></div>
+    <div class="caption-desc"     id="caption-desc"></div>
+    <div class="caption-credit"   id="caption-credit"></div>
+</div>
+
+<!-- Photo nav arrows (family mode only) -->
 <button id="arrow-prev" class="photo-nav-arrow" onclick="prevPhoto()" aria-label="Previous photo">❮</button>
 <button id="arrow-next" class="photo-nav-arrow" onclick="nextPhoto()" aria-label="Next photo">❯</button>
 
@@ -152,7 +194,7 @@ title: Home
     </div>
 </div>
 
-<!-- BG selector — sits above the bottom nav -->
+<!-- BG selector -->
 <div class="bg-selector">
     <button class="btn-mode" id="btn-family" onclick="setMode('family')">Family Photos</button>
     <button class="btn-mode" id="btn-nature" onclick="setMode('nature')">Daily Nature</button>
@@ -160,13 +202,21 @@ title: Home
 </div>
 
 <script>
+    /* ── CONFIG — edit these ── */
     var cloudName = 'dybmaxwvb';
-    var tagName   = 'dashboard';
+    var tagName   = 'dashboard';          // tag used in Cloudinary for family photos
     var crestPath = '/b-d-a-b-e-family-dashboard/assets/img/family-crest-metal-on-wood.png';
 
-    var photoUrls        = [];
-    var activeBg         = 1;
-    var currentIndex     = 0;
+    // ── Unsplash Access Key ──────────────────────────────────────────────────
+    // 1. Sign up free at https://unsplash.com/developers
+    // 2. Create an app → copy the "Access Key"
+    // 3. Paste it below (the free tier allows 50 requests/hour — plenty for daily use)
+    var unsplashAccessKey = 'uVlnR0MpCzzax-Zw8ViI6VOCJuo4z6H0G41lnZUgrWI';
+    // ─────────────────────────────────────────────────────────────────────────
+
+    var photoUrls         = [];
+    var activeBg          = 1;
+    var currentIndex      = 0;
     var slideshowInterval = null;
 
     /* ── Clock ── */
@@ -197,14 +247,13 @@ title: Home
         img.src = url;
     }
 
-    /* ── Cloudinary fetch ── */
+    /* ── Cloudinary fetch (family photos) ── */
     async function fetchCloudinary() {
         try {
             var listUrl  = 'https://res.cloudinary.com/' + cloudName + '/image/list/' + tagName + '.json?cb=' + Date.now();
             var response = await fetch(listUrl);
             if (!response.ok) throw new Error('Cloudinary fetch failed');
             var data = await response.json();
-            // Shuffle so it's a different order each session
             photoUrls = data.resources
                 .map(function(r) { return { r: r, sort: Math.random() }; })
                 .sort(function(a, b) { return a.sort - b.sort; })
@@ -234,13 +283,10 @@ title: Home
     }
 
     function resetSlideshow() {
-        if (slideshowInterval) {
-            clearInterval(slideshowInterval);
-            startSlideshow();
-        }
+        if (slideshowInterval) { clearInterval(slideshowInterval); startSlideshow(); }
     }
 
-    /* ── Manual nav ── */
+    /* ── Manual nav (family mode) ── */
     function nextPhoto() {
         if (photoUrls.length === 0) return;
         currentIndex = (currentIndex + 1) % photoUrls.length;
@@ -255,6 +301,90 @@ title: Home
         resetSlideshow();
     }
 
+    /* ── Nature caption helpers ── */
+    function showNatureCaption(location, description, photographerName, photographerUrl, photoPageUrl) {
+        document.getElementById('caption-location').textContent = location || 'Daily Nature';
+        document.getElementById('caption-desc').textContent     = description || '';
+        // Credit line with link to photo page (required by Unsplash guidelines)
+        var credit = document.getElementById('caption-credit');
+        if (photographerName) {
+            credit.innerHTML = 'Photo by <a href="' + (photographerUrl || '#') + '" target="_blank" rel="noopener">'
+                             + photographerName + '</a> on '
+                             + '<a href="' + (photoPageUrl || 'https://unsplash.com') + '" target="_blank" rel="noopener">Unsplash</a>';
+        } else {
+            credit.textContent = '';
+        }
+        document.getElementById('nature-caption').classList.add('visible');
+    }
+
+    function hideNatureCaption() {
+        document.getElementById('nature-caption').classList.remove('visible');
+    }
+
+    /* ── Unsplash daily nature photo ── */
+    async function fetchNaturePhoto() {
+        // Use today's date as a stable seed so the photo stays the same all day
+        var today = new Date();
+        var seed  = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+
+        // Cache in sessionStorage so we don't burn API calls on every page load
+        var cacheKey  = 'nature-photo-' + seed;
+        var cached    = sessionStorage.getItem(cacheKey);
+
+        if (cached) {
+            var data = JSON.parse(cached);
+            applyNaturePhoto(data);
+            return;
+        }
+
+        // Fallback if no API key is configured yet
+        if (!unsplashAccessKey || unsplashAccessKey === 'YOUR_UNSPLASH_ACCESS_KEY') {
+            applyBackground('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=2560&auto=format&fit=crop');
+            showNatureCaption('Daily Nature', 'Add your Unsplash Access Key to see location info.', '', '', '');
+            return;
+        }
+
+        try {
+            // Query: stunning landscape/nature, oriented landscape, high quality
+            var url = 'https://api.unsplash.com/photos/random'
+                    + '?query=nature+landscape+scenic'
+                    + '&orientation=landscape'
+                    + '&content_filter=high'
+                    + '&client_id=' + unsplashAccessKey;
+
+            var resp = await fetch(url);
+            if (!resp.ok) throw new Error('Unsplash error: ' + resp.status);
+            var photo = await resp.json();
+
+            var photoData = {
+                url:             photo.urls.raw + '&w=2560&q=85&fit=crop&auto=format',
+                location:        (photo.location && (photo.location.name || photo.location.city || photo.location.country)) || '',
+                description:     photo.description || photo.alt_description || '',
+                photographerName: photo.user.name,
+                photographerUrl:  photo.user.links.html + '?utm_source=horn_family_dashboard&utm_medium=referral',
+                photoPageUrl:     photo.links.html + '?utm_source=horn_family_dashboard&utm_medium=referral'
+            };
+
+            // Cap description length
+            if (photoData.description && photoData.description.length > 80) {
+                photoData.description = photoData.description.substring(0, 77) + '…';
+            }
+
+            sessionStorage.setItem(cacheKey, JSON.stringify(photoData));
+            applyNaturePhoto(photoData);
+
+        } catch(e) {
+            console.warn('Unsplash fetch failed, using static fallback:', e);
+            applyBackground('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=2560&auto=format&fit=crop');
+            showNatureCaption('Scenic Landscape', '', '', '', '');
+        }
+    }
+
+    function applyNaturePhoto(data) {
+        applyBackground(data.url);
+        showNatureCaption(data.location, data.description, data.photographerName, data.photographerUrl, data.photoPageUrl);
+    }
+
     /* ── Mode selector ── */
     function setMode(mode) {
         localStorage.setItem('dashboard-bg-mode', mode);
@@ -264,17 +394,17 @@ title: Home
         });
         document.getElementById('btn-' + mode).classList.add('active');
 
-        // Show/hide arrows — only relevant in family mode
         var arrowVis = (mode === 'family') ? '' : 'none';
         document.getElementById('arrow-prev').style.display = arrowVis;
         document.getElementById('arrow-next').style.display = arrowVis;
 
         if (slideshowInterval) { clearInterval(slideshowInterval); slideshowInterval = null; }
+        hideNatureCaption();
 
         if (mode === 'family') {
             fetchCloudinary();
         } else if (mode === 'nature') {
-            applyBackground('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=2560&auto=format&fit=crop');
+            fetchNaturePhoto();
         } else if (mode === 'crest') {
             applyBackground(crestPath);
         }
