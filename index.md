@@ -62,7 +62,7 @@ title: Home
     /* ── CLOCK / WEATHER — bottom left / right ── */
     .bottom-ui {
         position: fixed;
-        bottom: 110px;
+        bottom: 30px;
         left: 0; width: 100%;
         display: flex; justify-content: space-between; align-items: flex-end;
         padding: 0 70px; z-index: 10;
