@@ -204,7 +204,7 @@ title: Home
 <script>
     /* ── CONFIG — edit these ── */
     var cloudName = 'dybmaxwvb';
-    var tagName   = 'dashboard';          // tag used in Cloudinary for family photos
+    var tagName   = 'DBABE';          // tag used in Cloudinary for family photos
     var crestPath = '/b-d-a-b-e-family-dashboard/assets/img/family-crest-metal-on-wood.png';
 
     // ── Unsplash Access Key ──────────────────────────────────────────────────
