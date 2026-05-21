@@ -17,7 +17,7 @@ family_short:      "DBABE"          # used in upload page headings etc.
 crest_image:       "/assets/img/family-crest-metal-on-wood.png"
 
 # ── Location / weather ───────────────────────
-location_label:    "Lakewood, WA"
+location_label:    "Ravenlea"
 weather_url:       "https://forecast7.com/en/47d17n122d52/lakewood/?unit=us"
 weather_label_1:   "LAKEWOOD"
 weather_label_2:   "WASHINGTON"
@@ -27,6 +27,7 @@ cloudinary_cloud:  "dybmaxwvb"
 cloudinary_folder: "DBABE"          # primary photo folder
 cloudinary_folder_bonus: ""         # no bonus album for this site
 cloudinary_upload_preset: "DBABE-upload"
+cloudinary_upload_preset_bonus: ""     # no bonus album for Horn family
 cloudinary_tag:    "DBABE"          # tag used when fetching by tag
 
 # ── Background options ───────────────────────
