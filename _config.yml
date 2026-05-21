@@ -1,0 +1,56 @@
+# ─────────────────────────────────────────────
+#  Horn Family Dashboard — Site Configuration
+#  Edit this file to customise the dashboard.
+#  A matching config for the grandparents site
+#  lives in that repo with different values.
+# ─────────────────────────────────────────────
+
+# Jekyll
+title: Horn Family
+description: The Horn Family Dashboard
+baseurl: "/b-d-a-b-e-family-dashboard"
+url: "https://brandonbrews.github.io"
+
+# ── Family identity ──────────────────────────
+family_name:       "Horn Family"
+family_short:      "DBABE"          # used in upload page headings etc.
+crest_image:       "/assets/img/family-crest-metal-on-wood.png"
+
+# ── Location / weather ───────────────────────
+location_label:    "Lakewood, WA"
+weather_url:       "https://forecast7.com/en/47d17n122d52/lakewood/?unit=us"
+weather_label_1:   "LAKEWOOD"
+weather_label_2:   "WASHINGTON"
+
+# ── Cloudinary ───────────────────────────────
+cloudinary_cloud:  "dybmaxwvb"
+cloudinary_folder: "DBABE"          # primary photo folder
+cloudinary_folder_bonus: ""         # no bonus album for this site
+cloudinary_upload_preset: "DBABE-upload"
+cloudinary_tag:    "DBABE"          # tag used when fetching by tag
+
+# ── Background options ───────────────────────
+# List only the modes you want shown.
+# Options: family | nature | crest | bonus
+bg_modes:
+  - family
+  - nature
+  - crest
+# bonus not shown on this site (no bonus folder)
+
+# ── Pages / nav ──────────────────────────────
+# Set to false to hide a page from the nav entirely.
+show_calendar:     true
+show_chores:       true
+show_map:          true
+show_upload:       false            # upload page exists but is NOT in nav (direct URL only)
+
+calendar_type:     "google"         # google | apple
+
+# ── Upload page ──────────────────────────────
+upload_password:   "7117"
+
+# ── Unsplash ─────────────────────────────────
+# Add your Unsplash Access Key here so it's in one place.
+# index.md reads it from this config via Jekyll.
+unsplash_key:      "uVlnR0MpCzzax-Zw8ViI6VOCJuo4z6H0G41lnZUgrWI"
