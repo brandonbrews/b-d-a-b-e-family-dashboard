@@ -4,7 +4,6 @@ title: Home
 ---
 
 <style>
-    /* ── BACKGROUND LAYERS ── */
     #photo-bg-1, #photo-bg-2 {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background-size: cover; background-position: center;
@@ -18,52 +17,47 @@ title: Home
         z-index: 3; pointer-events: none;
     }
 
-    /* ── NATURE PHOTO CAPTION — top-right corner ── */
+    /* ── NATURE CAPTION ── */
     #nature-caption {
-        position: fixed;
-        top: 28px;
-        right: 28px;
-        z-index: 20;
-        text-align: right;
-        opacity: 0;
-        transition: opacity 0.8s ease;
-        pointer-events: none;
+        position: fixed; top: 28px; right: 28px;
+        z-index: 20; text-align: right;
+        opacity: 0; transition: opacity 0.8s ease; pointer-events: none;
     }
     #nature-caption.visible { opacity: 1; pointer-events: auto; }
-    #nature-caption .caption-location {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #fff;
-        text-transform: uppercase;
-        letter-spacing: 3px;
-        text-shadow: 0 2px 12px rgba(0,0,0,0.7);
-        line-height: 1.2;
+    .caption-location {
+        font-size: 1.5rem; font-weight: 700; color: #fff;
+        text-transform: uppercase; letter-spacing: 3px;
+        text-shadow: 0 2px 12px rgba(0,0,0,0.7); line-height: 1.2;
     }
-    #nature-caption .caption-desc {
-        font-size: 1rem;
-        font-weight: 400;
-        color: rgba(255,255,255,0.75);
+    .caption-desc {
+        font-size: 1rem; color: rgba(255,255,255,0.75);
         text-shadow: 0 2px 8px rgba(0,0,0,0.7);
-        margin-top: 4px;
-        max-width: 320px;
-        margin-left: auto;
+        margin-top: 4px; max-width: 320px; margin-left: auto;
     }
-    #nature-caption .caption-credit {
-        font-size: 0.8rem;
-        color: rgba(255,255,255,0.45);
-        margin-top: 6px;
-        text-shadow: 0 1px 6px rgba(0,0,0,0.6);
+    .caption-credit {
+        font-size: 0.8rem; color: rgba(255,255,255,0.45);
+        margin-top: 6px; text-shadow: 0 1px 6px rgba(0,0,0,0.6);
     }
-    #nature-caption .caption-credit a {
-        color: rgba(255,255,255,0.55);
-        text-decoration: underline;
-    }
+    .caption-credit a { color: rgba(255,255,255,0.55); text-decoration: underline; }
 
-    /* ── CLOCK / WEATHER — bottom left / right ── */
+    /* ── CREST INDICATOR — dots below crest showing position ── */
+    #crest-indicator {
+        position: fixed; bottom: 160px; left: 50%;
+        transform: translateX(-50%);
+        z-index: 20; display: none;
+        gap: 8px; align-items: center;
+    }
+    #crest-indicator.visible { display: flex; }
+    .crest-dot {
+        width: 8px; height: 8px; border-radius: 50%;
+        background: rgba(255,255,255,0.3);
+        transition: background 0.3s;
+    }
+    .crest-dot.active { background: rgba(255,255,255,0.9); }
+
+    /* ── CLOCK / WEATHER ── */
     .bottom-ui {
-        position: fixed;
-        bottom: 30px;
-        left: 0; width: 100%;
+        position: fixed; bottom: 28px; left: 0; width: 100%;
         display: flex; justify-content: space-between; align-items: flex-end;
         padding: 0 70px; z-index: 10;
     }
@@ -83,110 +77,91 @@ title: Home
 
     /* ── BG SELECTOR ── */
     .bg-selector {
-        position: fixed;
-        bottom: 96px;
-        left: 50%;
+        position: fixed; bottom: 96px; left: 50%;
         transform: translateX(-50%);
-        z-index: 1001;
-        display: flex;
-        flex-direction: row;
-        gap: 6px;
-        background: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(10px);
+        z-index: 1001; display: flex; gap: 6px;
+        background: rgba(0,0,0,0.6); backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
-        padding: 6px 10px;
-        border-radius: 50px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        opacity: 0.25;
-        transition: opacity 0.4s;
+        padding: 6px 10px; border-radius: 50px;
+        border: 1px solid rgba(255,255,255,0.1);
+        opacity: 0.25; transition: opacity 0.4s;
     }
-    .bg-selector:hover,
-    .bg-selector:focus-within { opacity: 1; }
-
+    .bg-selector:hover, .bg-selector:focus-within { opacity: 1; }
     .btn-mode {
-        background: transparent;
-        color: rgba(255, 255, 255, 0.7);
-        border: none;
-        padding: 6px 18px;
-        border-radius: 50px;
-        cursor: pointer;
-        font-size: 1.2rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        transition: color 0.3s, background 0.3s;
-        white-space: nowrap;
-        -webkit-tap-highlight-color: transparent;
-        touch-action: manipulation;
+        background: transparent; color: rgba(255,255,255,0.7);
+        border: none; padding: 6px 18px; border-radius: 50px;
+        cursor: pointer; font-size: 1.2rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 1px;
+        transition: color 0.3s, background 0.3s; white-space: nowrap;
+        -webkit-tap-highlight-color: transparent; touch-action: manipulation;
     }
     .btn-mode:hover { color: #fff; }
-    .btn-mode.active {
-        background: rgba(255, 255, 255, 0.15);
-        color: #fff;
-    }
+    .btn-mode.active { background: rgba(255,255,255,0.15); color: #fff; }
 
     /* ── PHOTO NAV ARROWS ── */
     .photo-nav-arrow {
-        position: fixed;
-        top: 50%;
-        transform: translateY(-50%);
+        position: fixed; top: 50%; transform: translateY(-50%);
         z-index: 100;
-        background: rgba(255, 255, 255, 0.08);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        color: white;
-        width: 64px;
-        height: 64px;
-        border-radius: 50%;
-        cursor: pointer;
-        font-size: 1.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 0;
-        transition: opacity 0.4s, background 0.3s;
-        -webkit-tap-highlight-color: transparent;
-        touch-action: manipulation;
+        background: rgba(255,255,255,0.08); backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.18);
+        color: white; width: 64px; height: 64px; border-radius: 50%;
+        cursor: pointer; font-size: 1.5rem;
+        display: flex; align-items: center; justify-content: center;
+        opacity: 0; transition: opacity 0.4s, background 0.3s;
+        -webkit-tap-highlight-color: transparent; touch-action: manipulation;
     }
     body:hover .photo-nav-arrow { opacity: 1; }
-    .photo-nav-arrow:hover {
-        background: rgba(255, 255, 255, 0.28);
-        opacity: 1;
-    }
+    .photo-nav-arrow:hover { background: rgba(255,255,255,0.28); opacity: 1; }
     @media (hover: none) {
         .photo-nav-arrow { opacity: 0.5; }
         .bg-selector { opacity: 1; }
     }
-
     #arrow-prev { left: 24px; }
     #arrow-next { right: 24px; }
+
+    /* ── UPLOAD BUTTON — subtle camera, top-left, appears on hover ── */
+    #upload-btn {
+        position: fixed; top: 20px; left: 24px; z-index: 500;
+        background: rgba(0,0,0,0.35); backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.15); border-radius: 50%;
+        width: 44px; height: 44px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.2rem; cursor: pointer; text-decoration: none;
+        opacity: 0; transition: opacity 0.4s;
+        -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+    }
+    body:hover #upload-btn { opacity: 1; }
+    #upload-btn:hover { background: rgba(0,0,0,0.6); opacity: 1; }
+    @media (hover: none) { #upload-btn { opacity: 0.6; } }
 </style>
 
-<!-- Backgrounds -->
 <div id="photo-bg-1"></div>
 <div id="photo-bg-2"></div>
 <div class="overlay-vignette"></div>
 
-<!-- Nature photo caption (top-right, only shown in nature mode) -->
 <div id="nature-caption">
     <div class="caption-location" id="caption-location"></div>
     <div class="caption-desc"     id="caption-desc"></div>
     <div class="caption-credit"   id="caption-credit"></div>
 </div>
 
-<!-- Photo nav arrows (family mode only) -->
-<button id="arrow-prev" class="photo-nav-arrow" onclick="prevPhoto()" aria-label="Previous photo">❮</button>
-<button id="arrow-next" class="photo-nav-arrow" onclick="nextPhoto()" aria-label="Next photo">❯</button>
+<!-- Crest position indicator dots -->
+<div id="crest-indicator"></div>
 
-<!-- Clock + weather -->
+<button id="arrow-prev" class="photo-nav-arrow" onclick="handlePrev()" aria-label="Previous">&#10094;</button>
+<button id="arrow-next" class="photo-nav-arrow" onclick="handleNext()" aria-label="Next">&#10095;</button>
+
+<a id="upload-btn" href="{{ site.baseurl }}/upload" title="Upload photos" aria-label="Upload photos">📷</a>
+
 <div class="bottom-ui">
     <div class="weather-box">
         <a class="weatherwidget-io"
            href="https://forecast7.com/en/47d17n122d52/lakewood/?unit=us"
            data-label_1="LAKEWOOD" data-label_2="WASHINGTON"
            data-icons="Climacons Animated" data-theme="pure"
-           data-basecolor="transparent" data-textcolor="#ffffff">LAKEWOOD WA</a>
+           data-basecolor="transparent" data-textcolor="#ffffff">LAKEWOOD WA
+            {{ site.weather_label_1 }} {{ site.weather_label_2 }}
+        </a>
     </div>
     <div class="clock-box">
         <div id="time-display">00:00</div>
@@ -194,44 +169,61 @@ title: Home
     </div>
 </div>
 
-<!-- BG selector -->
 <div class="bg-selector">
-    <button class="btn-mode" id="btn-family" onclick="setMode('family')">Family Photos</button>
-    <button class="btn-mode" id="btn-nature" onclick="setMode('nature')">Daily Nature</button>
-    <button class="btn-mode" id="btn-crest"  onclick="setMode('crest')">Family Crest</button>
+    {% for mode in site.bg_modes %}
+        {% if mode == 'family' %}
+        <button class="btn-mode" id="btn-family" onclick="setMode('family')">Family Photos</button>
+        {% endif %}
+        {% if mode == 'bonus' %}
+        <button class="btn-mode" id="btn-bonus"  onclick="setMode('bonus')">Bonus Photos</button>
+        {% endif %}
+        {% if mode == 'nature' %}
+        <button class="btn-mode" id="btn-nature" onclick="setMode('nature')">Daily Nature</button>
+        {% endif %}
+        {% if mode == 'crest' %}
+        <button class="btn-mode" id="btn-crest"  onclick="setMode('crest')">Family Crest</button>
+        {% endif %}
+    {% endfor %}
 </div>
 
 <script>
-    /* ── CONFIG — edit these ── */
-    var cloudName = 'dybmaxwvb';
-    var tagName   = 'DBABE';          // tag used in Cloudinary for family photos
-    var crestPath = '/b-d-a-b-e-family-dashboard/assets/img/family-crest-metal-on-wood.png';
+    /* ── Config from _config.yml ─────────────────────────────────── */
+    var CLOUD        = '{{ site.cloudinary_cloud }}';
+    var FOLDER       = '{{ site.cloudinary_folder }}';
+    var FOLDER_BONUS = '{{ site.cloudinary_folder_bonus }}';
+    var TAG          = '{{ site.cloudinary_tag }}';
+    var UNSPLASH_KEY = '{{ site.unsplash_key }}';
+    var BG_MODES     = {{ site.bg_modes | jsonify }};
+    var BASE_URL     = '{{ site.baseurl }}';
 
-    // ── Unsplash Access Key ──────────────────────────────────────────────────
-    // 1. Sign up free at https://unsplash.com/developers
-    // 2. Create an app → copy the "Access Key"
-    // 3. Paste it below (the free tier allows 50 requests/hour — plenty for daily use)
-    var unsplashAccessKey = 'uVlnR0MpCzzax-Zw8ViI6VOCJuo4z6H0G41lnZUgrWI';
-    // ─────────────────────────────────────────────────────────────────────────
+    /* Crest images — array injected from _config.yml crest_images list */
+    var CREST_IMAGES = [
+        {% for img in site.crest_images %}
+        '{{ site.baseurl }}{{ img }}'{% unless forloop.last %},{% endunless %}
+        {% endfor %}
+    ];
+    /* ─────────────────────────────────────────────────────────────── */
 
     var photoUrls         = [];
     var activeBg          = 1;
     var currentIndex      = 0;
+    var crestIndex        = 0;
     var slideshowInterval = null;
+    var currentMode       = null;
 
     /* ── Clock ── */
     function updateClock() {
         var now = new Date();
         var h   = now.getHours() % 12 || 12;
-        var m   = now.getMinutes().toString().padStart(2, '0');
+        var m   = now.getMinutes().toString().padStart(2,'0');
         document.getElementById('time-display').textContent = h + ':' + m;
         document.getElementById('date-display').textContent =
-            now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+            now.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
     }
     updateClock();
     setInterval(updateClock, 1000);
 
-    /* ── Background cross-fade ── */
+    /* ── Cross-fade ── */
     function applyBackground(url) {
         var nextBg  = activeBg === 1 ? 2 : 1;
         var current = document.getElementById('photo-bg-' + activeBg);
@@ -239,188 +231,208 @@ title: Home
         var img     = new Image();
         img.onload  = function() {
             next.style.backgroundImage = "url('" + url + "')";
-            next.style.opacity = 1;
+            next.style.opacity  = 1;
             current.style.opacity = 0;
             activeBg = nextBg;
         };
-        img.onerror = function() { console.error('Failed to load: ' + url); };
         img.src = url;
     }
 
-    /* ── Cloudinary fetch (family photos) ── */
-    async function fetchCloudinary() {
+    /* ── Cloudinary fetch ── */
+    function shuffle(arr) {
+        return arr.map(function(r){ return {r:r,s:Math.random()}; })
+                  .sort(function(a,b){ return a.s-b.s; })
+                  .map(function(o){ return o.r; });
+    }
+
+    async function fetchByFolder(folder) {
+        var url  = 'https://res.cloudinary.com/'+CLOUD+'/image/list/'+folder+'.json?cb='+Date.now();
+        var resp = await fetch(url);
+        if (!resp.ok) throw new Error('Cloudinary '+resp.status);
+        var data = await resp.json();
+        return shuffle(data.resources||[]).map(function(r){
+            return 'https://res.cloudinary.com/'+CLOUD
+                 + '/image/upload/q_auto,f_auto,w_2560,c_limit/'
+                 + r.public_id+'.'+r.format;
+        });
+    }
+
+    async function loadPhotos(folder) {
         try {
-            var listUrl  = 'https://res.cloudinary.com/' + cloudName + '/image/list/' + tagName + '.json?cb=' + Date.now();
-            var response = await fetch(listUrl);
-            if (!response.ok) throw new Error('Cloudinary fetch failed');
-            var data = await response.json();
-            photoUrls = data.resources
-                .map(function(r) { return { r: r, sort: Math.random() }; })
-                .sort(function(a, b) { return a.sort - b.sort; })
-                .map(function(o) {
-                    var r = o.r;
-                    return 'https://res.cloudinary.com/' + cloudName +
-                           '/image/upload/q_auto,f_auto,w_2560,c_limit/' +
-                           r.public_id + '.' + r.format;
-                });
-            if (photoUrls.length > 0) {
-                currentIndex = 0;
-                applyBackground(photoUrls[currentIndex]);
-                startSlideshow();
-            }
+            var urls = await fetchByFolder(folder);
+            if (!urls.length) throw new Error('No photos in '+folder);
+            photoUrls    = urls;
+            currentIndex = 0;
+            applyBackground(photoUrls[0]);
+            startSlideshow();
         } catch(e) {
-            console.warn('Cloudinary error, using fallback:', e);
+            console.warn('Photo load failed:', e);
             applyBackground('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2560');
         }
     }
 
     function startSlideshow() {
         if (slideshowInterval) clearInterval(slideshowInterval);
-        slideshowInterval = setInterval(function() {
-            currentIndex = (currentIndex + 1) % photoUrls.length;
+        slideshowInterval = setInterval(function(){
+            currentIndex = (currentIndex+1) % photoUrls.length;
             applyBackground(photoUrls[currentIndex]);
         }, 30000);
     }
-
     function resetSlideshow() {
         if (slideshowInterval) { clearInterval(slideshowInterval); startSlideshow(); }
     }
 
-    /* ── Manual nav (family mode) ── */
+    /* ── Photo nav (family / bonus modes) ── */
     function nextPhoto() {
-        if (photoUrls.length === 0) return;
-        currentIndex = (currentIndex + 1) % photoUrls.length;
+        if (!photoUrls.length) return;
+        currentIndex = (currentIndex+1) % photoUrls.length;
         applyBackground(photoUrls[currentIndex]);
         resetSlideshow();
     }
-
     function prevPhoto() {
-        if (photoUrls.length === 0) return;
-        currentIndex = (currentIndex - 1 + photoUrls.length) % photoUrls.length;
+        if (!photoUrls.length) return;
+        currentIndex = (currentIndex-1+photoUrls.length) % photoUrls.length;
         applyBackground(photoUrls[currentIndex]);
         resetSlideshow();
     }
 
-    /* ── Nature caption helpers ── */
-    function showNatureCaption(location, description, photographerName, photographerUrl, photoPageUrl) {
-        document.getElementById('caption-location').textContent = location || 'Daily Nature';
-        document.getElementById('caption-desc').textContent     = description || '';
-        // Credit line with link to photo page (required by Unsplash guidelines)
-        var credit = document.getElementById('caption-credit');
-        if (photographerName) {
-            credit.innerHTML = 'Photo by <a href="' + (photographerUrl || '#') + '" target="_blank" rel="noopener">'
-                             + photographerName + '</a> on '
-                             + '<a href="' + (photoPageUrl || 'https://unsplash.com') + '" target="_blank" rel="noopener">Unsplash</a>';
-        } else {
-            credit.textContent = '';
-        }
+    /* ── Crest cycling ── */
+    function buildCrestDots() {
+        var el = document.getElementById('crest-indicator');
+        el.innerHTML = '';
+        if (CREST_IMAGES.length <= 1) return; // no dots needed for single crest
+        CREST_IMAGES.forEach(function(_, i) {
+            var dot = document.createElement('div');
+            dot.className = 'crest-dot' + (i === crestIndex ? ' active' : '');
+            dot.id = 'crest-dot-' + i;
+            el.appendChild(dot);
+        });
+    }
+
+    function updateCrestDots() {
+        CREST_IMAGES.forEach(function(_, i) {
+            var dot = document.getElementById('crest-dot-' + i);
+            if (dot) dot.className = 'crest-dot' + (i === crestIndex ? ' active' : '');
+        });
+    }
+
+    function showCrest(index) {
+        crestIndex = (index + CREST_IMAGES.length) % CREST_IMAGES.length;
+        applyBackground(CREST_IMAGES[crestIndex]);
+        updateCrestDots();
+    }
+
+    function nextCrest() { showCrest(crestIndex + 1); }
+    function prevCrest() { showCrest(crestIndex - 1); }
+
+    /* ── Unified arrow handlers — behaviour depends on current mode ── */
+    function handleNext() {
+        if (currentMode === 'crest')  nextCrest();
+        else                           nextPhoto();
+    }
+    function handlePrev() {
+        if (currentMode === 'crest')  prevCrest();
+        else                           prevPhoto();
+    }
+
+    /* ── Nature caption ── */
+    function showCaption(loc, desc, name, userUrl, photoUrl) {
+        document.getElementById('caption-location').textContent = loc || 'Daily Nature';
+        document.getElementById('caption-desc').textContent     = desc || '';
+        var el = document.getElementById('caption-credit');
+        el.innerHTML = name
+            ? 'Photo by <a href="'+userUrl+'" target="_blank" rel="noopener">'+name+'</a>'
+            + ' on <a href="'+photoUrl+'" target="_blank" rel="noopener">Unsplash</a>'
+            : '';
         document.getElementById('nature-caption').classList.add('visible');
     }
-
-    function hideNatureCaption() {
+    function hideCaption() {
         document.getElementById('nature-caption').classList.remove('visible');
     }
 
-    /* ── Unsplash daily nature photo ── */
-    async function fetchNaturePhoto() {
-        // Use today's date as a stable seed so the photo stays the same all day
-        var today = new Date();
-        var seed  = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
-
-        // Cache in sessionStorage so we don't burn API calls on every page load
-        var cacheKey  = 'nature-photo-' + seed;
-        var cached    = sessionStorage.getItem(cacheKey);
-
+    /* ── Unsplash daily nature ── */
+    async function fetchNature() {
+        var today    = new Date();
+        var cacheKey = 'nature-'+today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+        var cached   = sessionStorage.getItem(cacheKey);
         if (cached) {
-            var data = JSON.parse(cached);
-            applyNaturePhoto(data);
+            var d = JSON.parse(cached);
+            applyBackground(d.url);
+            showCaption(d.loc,d.desc,d.name,d.userUrl,d.photoUrl);
             return;
         }
-
-        // Fallback if no API key is configured yet
-        if (!unsplashAccessKey || unsplashAccessKey === 'YOUR_UNSPLASH_ACCESS_KEY') {
+        if (!UNSPLASH_KEY || UNSPLASH_KEY === 'uVlnR0MpCzzax-Zw8ViI6VOCJuo4z6H0G41lnZUgrWI') {
             applyBackground('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=2560&auto=format&fit=crop');
-            showNatureCaption('Daily Nature', 'Add your Unsplash Access Key to see location info.', '', '', '');
+            showCaption('Daily Nature','Add unsplash_key to _config.yml','','','');
             return;
         }
-
         try {
-            // Query: stunning landscape/nature, oriented landscape, high quality
-            var url = 'https://api.unsplash.com/photos/random'
-                    + '?query=nature+landscape+scenic'
-                    + '&orientation=landscape'
-                    + '&content_filter=high'
-                    + '&client_id=' + unsplashAccessKey;
-
-            var resp = await fetch(url);
-            if (!resp.ok) throw new Error('Unsplash error: ' + resp.status);
-            var photo = await resp.json();
-
-            var photoData = {
-                url:             photo.urls.raw + '&w=2560&q=85&fit=crop&auto=format',
-                location:        (photo.location && (photo.location.name || photo.location.city || photo.location.country)) || '',
-                description:     photo.description || photo.alt_description || '',
-                photographerName: photo.user.name,
-                photographerUrl:  photo.user.links.html + '?utm_source=horn_family_dashboard&utm_medium=referral',
-                photoPageUrl:     photo.links.html + '?utm_source=horn_family_dashboard&utm_medium=referral'
+            var resp = await fetch('https://api.unsplash.com/photos/random'
+                +'?query=nature+landscape+scenic&orientation=landscape'
+                +'&content_filter=high&client_id='+UNSPLASH_KEY);
+            if (!resp.ok) throw new Error(resp.status);
+            var p = await resp.json();
+            var d = {
+                url:     p.urls.raw+'&w=2560&q=85&fit=crop&auto=format',
+                loc:     (p.location&&(p.location.name||p.location.city||p.location.country))||'',
+                desc:    (p.description||p.alt_description||'').substring(0,80),
+                name:    p.user.name,
+                userUrl: p.user.links.html+'?utm_source=family_dashboard&utm_medium=referral',
+                photoUrl:p.links.html+'?utm_source=family_dashboard&utm_medium=referral'
             };
-
-            // Cap description length
-            if (photoData.description && photoData.description.length > 80) {
-                photoData.description = photoData.description.substring(0, 77) + '…';
-            }
-
-            sessionStorage.setItem(cacheKey, JSON.stringify(photoData));
-            applyNaturePhoto(photoData);
-
+            sessionStorage.setItem(cacheKey, JSON.stringify(d));
+            applyBackground(d.url);
+            showCaption(d.loc,d.desc,d.name,d.userUrl,d.photoUrl);
         } catch(e) {
-            console.warn('Unsplash fetch failed, using static fallback:', e);
+            console.warn('Unsplash error:',e);
             applyBackground('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=2560&auto=format&fit=crop');
-            showNatureCaption('Scenic Landscape', '', '', '', '');
         }
-    }
-
-    function applyNaturePhoto(data) {
-        applyBackground(data.url);
-        showNatureCaption(data.location, data.description, data.photographerName, data.photographerUrl, data.photoPageUrl);
     }
 
     /* ── Mode selector ── */
     function setMode(mode) {
-        localStorage.setItem('dashboard-bg-mode', mode);
+        if (BG_MODES.indexOf(mode) === -1) mode = BG_MODES[0];
+        currentMode = mode;
+        localStorage.setItem(BASE_URL+'-bg-mode', mode);
 
-        document.querySelectorAll('.btn-mode').forEach(function(b) {
-            b.classList.remove('active');
-        });
-        document.getElementById('btn-' + mode).classList.add('active');
-
-        var arrowVis = (mode === 'family') ? '' : 'none';
-        document.getElementById('arrow-prev').style.display = arrowVis;
-        document.getElementById('arrow-next').style.display = arrowVis;
+        document.querySelectorAll('.btn-mode').forEach(function(b){ b.classList.remove('active'); });
+        var btn = document.getElementById('btn-'+mode);
+        if (btn) btn.classList.add('active');
 
         if (slideshowInterval) { clearInterval(slideshowInterval); slideshowInterval = null; }
-        hideNatureCaption();
+        photoUrls = [];
+        hideCaption();
 
-        if (mode === 'family') {
-            fetchCloudinary();
-        } else if (mode === 'nature') {
-            fetchNaturePhoto();
-        } else if (mode === 'crest') {
-            applyBackground(crestPath);
+        /* Arrows: visible for photo modes AND crest (when >1 crest) */
+        var showArrows = (mode === 'family' || mode === 'bonus')
+                      || (mode === 'crest' && CREST_IMAGES.length > 1);
+        document.getElementById('arrow-prev').style.display = showArrows ? '' : 'none';
+        document.getElementById('arrow-next').style.display = showArrows ? '' : 'none';
+
+        /* Crest dots: only in crest mode */
+        var indicator = document.getElementById('crest-indicator');
+        if (mode === 'crest' && CREST_IMAGES.length > 1) {
+            indicator.classList.add('visible');
+        } else {
+            indicator.classList.remove('visible');
+        }
+
+        if      (mode === 'family') { loadPhotos(FOLDER); }
+        else if (mode === 'bonus')  { loadPhotos(FOLDER_BONUS); }
+        else if (mode === 'nature') { fetchNature(); }
+        else if (mode === 'crest')  {
+            buildCrestDots();
+            showCrest(crestIndex); // resume from last viewed crest
         }
     }
 
-    // Restore last-used mode on load
-    var savedMode = localStorage.getItem('dashboard-bg-mode') || 'family';
-    setMode(savedMode);
+    var saved = localStorage.getItem(BASE_URL+'-bg-mode') || BG_MODES[0];
+    setMode(saved);
 
-    // Weather widget
     !function(d,s,id){
         var js,fjs=d.getElementsByTagName(s)[0];
-        if(!d.getElementById(id)){
-            js=d.createElement(s); js.id=id;
-            js.src='https://weatherwidget.io/js/widget.min.js';
-            fjs.parentNode.insertBefore(js,fjs);
-        }
+        if(!d.getElementById(id)){js=d.createElement(s);js.id=id;
+        js.src='https://weatherwidget.io/js/widget.min.js';
+        fjs.parentNode.insertBefore(js,fjs);}
     }(document,'script','weatherwidget-io-js');
 </script>

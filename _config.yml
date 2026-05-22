@@ -13,45 +13,45 @@ url: "https://brandonbrews.github.io"
 
 # ── Family identity ──────────────────────────
 family_name:       "Horn Family"
-family_short:      "DBABE"          # used in upload page headings etc.
-crest_image:       "/assets/img/family-crest-metal-on-wood.png"
+family_short:      "DBABE"
+crest_images:
+  - "/assets/img/family-crest-metal-on-wood.png"
+  - "/assets/img/family-crest-white.png"
+  - "/assets/img/family-crest.png"
 
 # ── Location / weather ───────────────────────
-location_label:    "Ravenlea"
+location_label:    "Lakewood, WA"
 weather_url:       "https://forecast7.com/en/47d17n122d52/lakewood/?unit=us"
 weather_label_1:   "LAKEWOOD"
 weather_label_2:   "WASHINGTON"
 
 # ── Cloudinary ───────────────────────────────
-cloudinary_cloud:  "dybmaxwvb"
-cloudinary_folder: "DBABE"          # primary photo folder
-cloudinary_folder_bonus: ""         # no bonus album for this site
-cloudinary_upload_preset: "DBABE-upload"
-cloudinary_upload_preset_bonus: ""     # no bonus album for Horn family
-cloudinary_tag:    "DBABE"          # tag used when fetching by tag
+cloudinary_cloud:             "dybmaxwvb"
+cloudinary_folder:            "DBABE"
+cloudinary_folder_bonus:      "DBABE-bonus-album"
+cloudinary_upload_preset:     "DBABE-upload"
+cloudinary_upload_preset_bonus: "DBABE-bonus-album"
+cloudinary_tag:               "DBABE"
 
 # ── Background options ───────────────────────
-# List only the modes you want shown.
-# Options: family | nature | crest | bonus
+# Controls which buttons appear — and in what order.
+# Options: family | bonus | nature | crest
 bg_modes:
   - family
+  - bonus
   - nature
   - crest
-# bonus not shown on this site (no bonus folder)
 
 # ── Pages / nav ──────────────────────────────
-# Set to false to hide a page from the nav entirely.
 show_calendar:     true
 show_chores:       true
 show_map:          true
-show_upload:       false            # upload page exists but is NOT in nav (direct URL only)
+show_upload:       false
 
-calendar_type:     "google"         # google | apple
+calendar_type:     "google"
 
 # ── Upload page ──────────────────────────────
 upload_password:   "7117"
 
 # ── Unsplash ─────────────────────────────────
-# Add your Unsplash Access Key here so it's in one place.
-# index.md reads it from this config via Jekyll.
 unsplash_key:      "uVlnR0MpCzzax-Zw8ViI6VOCJuo4z6H0G41lnZUgrWI"
