@@ -15,4 +15,4 @@ title: Chores
     }
 </style>
 
-<iframe src="https://script.google.com/macros/s/AKfycbzt0_Nekjv-G3sLy9p5C84BhP8RB6pWUVcPG_iEDvJzqHHAyxO1xF9Y315LXUvLRe6K/exec" class="fullscreen-iframe"></iframe>
+<iframe src="https://script.google.com/macros/s/AKfycbzuf6kFBc0u2K_NXNaYswxoY3FagqMOkOhZDhL0pS6xCkmF7tWnQNVXuRrj2eYBoz4O/exec" class="fullscreen-iframe"></iframe>
