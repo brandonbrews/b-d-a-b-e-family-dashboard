@@ -155,13 +155,7 @@ title: Home
 
 <div class="bottom-ui">
     <div class="weather-box">
-        <a class="weatherwidget-io"
-           href="https://forecast7.com/en/47d17n122d52/lakewood/?unit=us"
-           data-label_1="LAKEWOOD" data-label_2="WASHINGTON"
-           data-icons="Climacons Animated" data-theme="pure"
-           data-basecolor="transparent" data-textcolor="#ffffff">LAKEWOOD WA
-            {{ site.weather_label_1 }} {{ site.weather_label_2 }}
-        </a>
+        <a class="weatherwidget-io" href="https://forecast7.com/en/47d17n122d52/lakewood/?unit=us" data-label_1="LAKEWOOD" data-label_2="WEATHER" data-font="Noto Serif" data-theme="pure" >LAKEWOOD WEATHER</a>
     </div>
     <div class="clock-box">
         <div id="time-display">00:00</div>
