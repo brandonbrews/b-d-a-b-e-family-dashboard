@@ -89,28 +89,28 @@ title: Home
         letter-spacing: 6px; opacity: 0.8; color: #fff;
     }
 
-    /* ── BG SELECTOR ── */
+    /* ── BG SELECTOR — intentionally smaller/subtler than the main nav ── */
     .bg-selector {
-        position: fixed; bottom: 96px; left: 50%;
+        position: fixed; bottom: 112px; left: 50%;
         transform: translateX(-50%);
-        z-index: 1001; display: flex; gap: 6px;
-        background: rgba(0,0,0,0.6); backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        padding: 6px 10px; border-radius: 50px;
-        border: 1px solid rgba(255,255,255,0.1);
-        opacity: 0.25; transition: opacity 0.4s;
+        z-index: 1001; display: flex; gap: 4px;
+        background: rgba(0,0,0,0.45); backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        padding: 4px 8px; border-radius: 40px;
+        border: 1px solid rgba(255,255,255,0.08);
+        opacity: 0.2; transition: opacity 0.4s;
     }
     .bg-selector:hover, .bg-selector:focus-within { opacity: 1; }
     .btn-mode {
-        background: transparent; color: rgba(255,255,255,0.7);
-        border: none; padding: 6px 18px; border-radius: 50px;
-        cursor: pointer; font-size: 1.2rem; font-weight: 700;
+        background: transparent; color: rgba(255,255,255,0.55);
+        border: none; padding: 4px 14px; border-radius: 40px;
+        cursor: pointer; font-size: 0.85rem; font-weight: 600;
         text-transform: uppercase; letter-spacing: 1px;
         transition: color 0.3s, background 0.3s; white-space: nowrap;
         -webkit-tap-highlight-color: transparent; touch-action: manipulation;
     }
-    .btn-mode:hover { color: #fff; }
-    .btn-mode.active { background: rgba(255,255,255,0.15); color: #fff; }
+    .btn-mode:hover { color: rgba(255,255,255,0.85); }
+    .btn-mode.active { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.9); }
 
     /* ── PHOTO NAV ARROWS ── */
     .photo-nav-arrow {
