@@ -213,11 +213,18 @@ title: Chores
 <script>
   /* ── CONFIG ── */
   var SHEET_ID    = '1Sj_yeVYQO_UVwXaXLLdZU0SxiW9Qd2EHCQH_vwhhQHU';
-  var API_KEY     = 'AIzaSyCULOVeHvqycVeXiQlfK1YXCJx1YmRBI1s';
   var CSV_KIDS    = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRCxQfzCvX23raHww47T93p_2KFRS7tbg-jkw6OJd11ZAruY1zSOhp40oAVJfCwTDjlImnDv1fxHGXD/pub?gid=0&single=true&output=csv';
   var CSV_CHORES  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRCxQfzCvX23raHww47T93p_2KFRS7tbg-jkw6OJd11ZAruY1zSOhp40oAVJfCwTDjlImnDv1fxHGXD/pub?gid=366572312&single=true&output=csv';
   var CSV_REWARDS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRCxQfzCvX23raHww47T93p_2KFRS7tbg-jkw6OJd11ZAruY1zSOhp40oAVJfCwTDjlImnDv1fxHGXD/pub?gid=1460852569&single=true&output=csv';
-  var BASE        = 'https://sheets.googleapis.com/v4/spreadsheets/' + SHEET_ID;
+
+  /*
+   * PROXY_BASE: your Cloudflare Worker URL — no trailing slash.
+   * The API key lives in the Worker as an encrypted secret; it never
+   * appears in this file or your public repo.
+   * Set this after deploying sheets-worker.js to Cloudflare Workers.
+   * Example: 'https://sheets-proxy.YOUR-SUBDOMAIN.workers.dev'
+   */
+  var PROXY_BASE  = 'sheets-proxy.brandonhorn.workers.dev';
 
   /* ── State ── */
   var appData       = { kids: [], chores: [], rewards: [] };
@@ -579,26 +586,28 @@ title: Chores
     } catch(e){ handleSyncError(e); }
   }
 
-  /* ── Sheets API helpers ── */
+  /* ── Sheets API helpers — all calls routed through Cloudflare Worker proxy ── */
+  function proxyURL(path, qi) {
+    /* Encodes the Sheets API path and optional extra query params for the Worker */
+    var url = PROXY_BASE + '?path=' + encodeURIComponent('/' + SHEET_ID + path);
+    if (qi) url += '&qi=' + encodeURIComponent(qi);
+    return url;
+  }
   async function sheetsGET(range) {
-    var resp=await fetch(BASE+'/values/'+encodeURIComponent(range)+'?key='+API_KEY);
+    var resp = await fetch(proxyURL('/values/' + encodeURIComponent(range)));
     return resp.json();
   }
   async function sheetsPUT(range, values, inputOption) {
-    return fetch(
-      BASE+'/values/'+encodeURIComponent(range)+'?valueInputOption='+(inputOption||'RAW')+'&key='+API_KEY,
+    return fetch(proxyURL('/values/' + encodeURIComponent(range),
+        'valueInputOption=' + (inputOption||'RAW')),
       { method:'PUT', headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({values:values}) }
-    );
+        body:JSON.stringify({values:values}) });
   }
   async function sheetsAppend(sheetName, values) {
-    /* Correct append URL: /values/{range}:append — no extra colon */
-    return fetch(
-      BASE+'/values/'+encodeURIComponent(sheetName)+'!A1:append'
-      +'?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS&key='+API_KEY,
+    return fetch(proxyURL('/values/' + encodeURIComponent(sheetName+'!A1') + ':append',
+        'valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS'),
       { method:'POST', headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({values:values}) }
-    );
+        body:JSON.stringify({values:values}) });
   }
   async function updateKidBucks(kidName, delta) {
     var data=await sheetsGET('Kids');
