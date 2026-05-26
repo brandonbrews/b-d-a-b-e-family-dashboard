@@ -6,10 +6,24 @@ title: Home
 <style>
     #photo-bg-1, #photo-bg-2 {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background-size: cover; background-position: center;
         transition: opacity 2s ease-in-out; z-index: 1; background-color: #000;
+        display: flex; align-items: center; justify-content: center;
+        overflow: hidden;
     }
     #photo-bg-2 { opacity: 0; }
+
+    /* The actual image inside each bg layer */
+    .bg-img {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        object-fit: cover;       /* default: fill screen, crop if needed */
+        object-position: center;
+        transition: none;
+    }
+    /* Portrait photos: contain so nothing is cropped */
+    .bg-img.portrait {
+        object-fit: contain;
+        background-color: #000;  /* letterbox bars */
+    }
 
     .overlay-vignette {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -229,13 +243,28 @@ title: Home
         var nextBg  = activeBg === 1 ? 2 : 1;
         var current = document.getElementById('photo-bg-' + activeBg);
         var next    = document.getElementById('photo-bg-' + nextBg);
-        var img     = new Image();
-        img.onload  = function() {
-            next.style.backgroundImage = "url('" + url + "')";
-            next.style.opacity  = 1;
+
+        var img = new Image();
+        img.onload = function() {
+            /* Detect portrait photos (taller than wide) */
+            var isPortrait = img.naturalHeight > img.naturalWidth * 1.1;
+
+            /* Build or update the <img> inside the next layer */
+            var existing = next.querySelector('.bg-img');
+            if (!existing) {
+                existing = document.createElement('img');
+                existing.className = 'bg-img';
+                existing.alt = '';
+                next.appendChild(existing);
+            }
+            existing.src = url;
+            existing.classList.toggle('portrait', isPortrait);
+
+            next.style.opacity    = 1;
             current.style.opacity = 0;
             activeBg = nextBg;
         };
+        img.onerror = function() { console.error('Failed to load: ' + url); };
         img.src = url;
     }
 
