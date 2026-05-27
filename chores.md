@@ -224,7 +224,7 @@ title: Chores
    * Set this after deploying sheets-worker.js to Cloudflare Workers.
    * Example: 'https://sheets-proxy.YOUR-SUBDOMAIN.workers.dev'
    */
-  var PROXY_BASE  = 'sheets-proxy.brandonhorn.workers.dev';
+  var PROXY_BASE  = 'https://sheets-proxy.brandonhorn.workers.dev';
 
   /* ── State ── */
   var appData       = { kids: [], chores: [], rewards: [] };
@@ -523,8 +523,7 @@ title: Chores
     setSyncStatus('syncing','↑ saving…');
     try {
       /* 1. Mark chore done in Chores sheet */
-      var choresResp=await fetch(BASE+'/values/Chores?key='+API_KEY);
-      var choresData=await choresResp.json();
+      var choresData = await sheetsGET('Chores');
       var rows=choresData.values||[]; var hdr=rows[0]||[];
       var nameIdx=hdr.indexOf('Chore Name'), assignIdx=hdr.indexOf('Assigned To');
       var statusIdx=hdr.indexOf('Status'), lastIdx=hdr.indexOf('Last Completed');
@@ -543,7 +542,7 @@ title: Chores
       /* 2. Update kid bucks */
       await updateKidBucks(kidName, spaceBucks);
 
-      /* 3. Append to log — FIXED URL */
+      /* 3. Append to log */
       await sheetsAppend('Log', [[timestamp, kidName, 'Chore Completed', choreName, spaceBucks]]);
 
       setSyncStatus('','');
@@ -564,8 +563,8 @@ title: Chores
     try {
       if (action.type==='chore'){
         /* Un-mark chore in sheet */
-        var choresResp=await fetch(BASE+'/values/Chores?key='+API_KEY);
-        var rows=(await choresResp.json()).values||[]; var hdr=rows[0]||[];
+        var choresData = await sheetsGET('Chores');
+        var rows=choresData.values||[]; var hdr=rows[0]||[];
         var nameIdx=hdr.indexOf('Chore Name'), assignIdx=hdr.indexOf('Assigned To');
         var statusIdx=hdr.indexOf('Status'), lastIdx=hdr.indexOf('Last Completed');
         for (var i=1;i<rows.length;i++){
@@ -586,37 +585,55 @@ title: Chores
     } catch(e){ handleSyncError(e); }
   }
 
-  /* ── Sheets API helpers — all calls routed through Cloudflare Worker proxy ── */
-  function proxyURL(path, qi) {
-    /* Encodes the Sheets API path and optional extra query params for the Worker */
-    var url = PROXY_BASE + '?path=' + encodeURIComponent('/' + SHEET_ID + path);
+  /* ── Sheets API helpers — all calls routed through Cloudflare Worker proxy ──
+   * The Worker expects:  ?path=/SHEET_ID/values/SheetName!A1:append&qi=valueInputOption=...
+   * Paths must NOT be double-encoded — pass the raw path string, Worker handles forwarding.
+   * ── */
+  function proxyURL(rawPath, qi) {
+    var url = PROXY_BASE + '?path=' + encodeURIComponent(rawPath);
     if (qi) url += '&qi=' + encodeURIComponent(qi);
     return url;
   }
+
   async function sheetsGET(range) {
-    var resp = await fetch(proxyURL('/values/' + encodeURIComponent(range)));
+    var path = '/' + SHEET_ID + '/values/' + range;
+    var resp = await fetch(proxyURL(path));
+    if (!resp.ok) throw new Error('GET failed: ' + resp.status + ' ' + await resp.text());
     return resp.json();
   }
+
   async function sheetsPUT(range, values, inputOption) {
-    return fetch(proxyURL('/values/' + encodeURIComponent(range),
-        'valueInputOption=' + (inputOption||'RAW')),
-      { method:'PUT', headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({values:values}) });
+    var path = '/' + SHEET_ID + '/values/' + range;
+    var resp = await fetch(proxyURL(path, 'valueInputOption=' + (inputOption||'RAW')), {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values: values })
+    });
+    if (!resp.ok) throw new Error('PUT failed: ' + resp.status + ' ' + await resp.text());
+    return resp;
   }
+
   async function sheetsAppend(sheetName, values) {
-    return fetch(proxyURL('/values/' + encodeURIComponent(sheetName+'!A1') + ':append',
-        'valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS'),
-      { method:'POST', headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({values:values}) });
+    /* :append must be in the path BEFORE encoding, not appended after */
+    var path = '/' + SHEET_ID + '/values/' + sheetName + '!A1:append';
+    var resp = await fetch(
+      proxyURL(path, 'valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS'),
+      { method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ values: values }) }
+    );
+    if (!resp.ok) throw new Error('Append failed: ' + resp.status + ' ' + await resp.text());
+    return resp;
   }
+
   async function updateKidBucks(kidName, delta) {
-    var data=await sheetsGET('Kids');
-    var rows=data.values||[]; var hdr=rows[0]||[];
-    var kNameIdx=hdr.indexOf('Name'), kBuckIdx=hdr.indexOf('Total Bucks');
-    for (var j=1;j<rows.length;j++){
-      if (String(rows[j][kNameIdx]||'').trim().toLowerCase()===kidName.toLowerCase()){
-        var current=parseInt(rows[j][kBuckIdx])||0;
-        await sheetsPUT('Kids!'+colLetter(kBuckIdx)+(j+1),[[Math.max(0,current+delta)]]);
+    var data = await sheetsGET('Kids');
+    var rows = data.values||[]; var hdr = rows[0]||[];
+    var kNameIdx = hdr.indexOf('Name'), kBuckIdx = hdr.indexOf('Total Bucks');
+    for (var j = 1; j < rows.length; j++) {
+      if (String(rows[j][kNameIdx]||'').trim().toLowerCase() === kidName.toLowerCase()) {
+        var current = parseInt(rows[j][kBuckIdx])||0;
+        await sheetsPUT('Kids!'+colLetter(kBuckIdx)+(j+1), [[Math.max(0, current+delta)]]);
         break;
       }
     }
