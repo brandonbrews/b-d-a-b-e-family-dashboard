@@ -415,7 +415,7 @@ title: Chores
     });
 
     /* Save undo state */
-    var timestamp=new Date().toISOString();
+    var timestamp=friendlyTimestamp();
     undoStacks[kidName]={type:'chore', kidName, choreName, spaceBucks, freq, timestamp, oldBucks};
     var undoBtn=document.getElementById('undo-btn-'+kidName);
     if (undoBtn) undoBtn.classList.add('visible');
@@ -452,7 +452,7 @@ title: Chores
       if (body&&pageTab==='rewards') renderRewards(body,kidName,kid['Total Bucks']);
     }
 
-    var timestamp=new Date().toISOString();
+    var timestamp=friendlyTimestamp();
     undoStacks[kidName]={type:'reward', kidName, rewardName, cost, icon, timestamp, oldBucks};
     var undoBtn=document.getElementById('undo-btn-'+kidName);
     if (undoBtn) undoBtn.classList.add('visible');
@@ -576,10 +576,10 @@ title: Chores
           }
         }
         await updateKidBucks(action.kidName, -action.spaceBucks);
-        await sheetsAppend('Log', [[new Date().toISOString(), action.kidName, 'UNDO Chore', action.choreName, -action.spaceBucks]]);
+        await sheetsAppend('Log', [[friendlyTimestamp(), action.kidName, 'UNDO Chore', action.choreName, -action.spaceBucks]]);
       } else {
         await updateKidBucks(action.kidName, action.cost);
-        await sheetsAppend('Log', [[new Date().toISOString(), action.kidName, 'UNDO Reward', action.rewardName, action.cost]]);
+        await sheetsAppend('Log', [[friendlyTimestamp(), action.kidName, 'UNDO Reward', action.rewardName, action.cost]]);
       }
       setSyncStatus('','');
     } catch(e){ handleSyncError(e); }
@@ -637,6 +637,14 @@ title: Chores
         break;
       }
     }
+  }
+
+  /* Returns a human-readable timestamp for the Log sheet, e.g. "May 27, 2026 2:32 PM" */
+  function friendlyTimestamp() {
+    return new Date().toLocaleString('en-US', {
+      month: 'short', day: 'numeric', year: 'numeric',
+      hour: 'numeric', minute: '2-digit', hour12: true
+    });
   }
 
   function colLetter(idx){
