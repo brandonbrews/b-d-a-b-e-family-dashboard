@@ -47,6 +47,7 @@ show_calendar:     true
 show_chores:       true
 show_map:          true
 show_upload:       false
+show_reading:      true             # 40 Book Challenge tracker
 
 calendar_type:     "google"
 

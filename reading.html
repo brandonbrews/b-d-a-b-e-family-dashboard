@@ -1,0 +1,405 @@
+---
+layout: default
+title: 40 Book Challenge
+permalink: /reading/
+---
+
+<style>
+  #reading-app {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: #FAF6EE;
+    color: #1B2A41;
+    padding: 1.75rem;
+    border-radius: 16px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  #reading-app .rt-serif { font-family: Georgia, 'Times New Roman', serif; }
+  #reading-app .rt-tabs { display: flex; gap: 8px; margin-bottom: 1.25rem; }
+  #reading-app .rt-tab {
+    font-family: system-ui, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 2px solid #1B2A41;
+    background: #fff;
+    color: #1B2A41;
+    cursor: pointer;
+    min-height: 44px;
+  }
+  #reading-app .rt-tab.active { background: #1B2A41; color: #FAF6EE; }
+  #reading-app .rt-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+  #reading-app .rt-stat { background: #fff; border-radius: 10px; padding: 14px; }
+  #reading-app .rt-stat-label { font-size: 13px; color: #6B6558; }
+  #reading-app .rt-stat-value { font-size: 28px; font-weight: 700; }
+  #reading-app .rt-input, #reading-app select {
+    font-family: system-ui, sans-serif;
+    font-size: 16px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #D8D2C2;
+    background: #fff;
+    color: #1B2A41;
+    min-height: 44px;
+  }
+  #reading-app .rt-btn {
+    font-family: system-ui, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 12px 22px;
+    border-radius: 10px;
+    border: none;
+    background: #1B2A41;
+    color: #FAF6EE;
+    cursor: pointer;
+    min-height: 44px;
+  }
+  #reading-app .rt-remove {
+    background: none; border: none; color: #6B6558; cursor: pointer;
+    font-size: 14px; padding: 10px; min-height: 40px;
+  }
+  #reading-app .rt-check { width: 20px; height: 20px; }
+  #reading-app .rt-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+  #reading-app .rt-bar-label { width: 150px; font-size: 14px; }
+  #reading-app .rt-bar-track { flex: 1; height: 10px; background: #EDE7D8; border-radius: 5px; overflow: hidden; }
+  #reading-app .rt-bar-fill { height: 100%; border-radius: 5px; }
+  #reading-app .rt-bar-count { width: 56px; font-size: 14px; color: #6B6558; text-align: right; }
+  #reading-app .rt-entry {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 14px; padding: 10px 12px; background: #fff; border-radius: 8px; margin-bottom: 5px;
+  }
+</style>
+
+<div id="reading-app"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script>
+(function () {
+  const START_DATE = new Date("2026-09-14T00:00:00");
+  const END_DATE = new Date("2027-06-01T00:00:00");
+  const MS_WEEK = 7 * 24 * 60 * 60 * 1000;
+  const TOTAL_WEEKS = Math.round((END_DATE - START_DATE) / MS_WEEK);
+  const TOTAL_GOAL = 40;
+  const OTHER = "__other__";
+  const INK = "#1B2A41", GOLD = "#C4922B", GREEN = "#3F6C51", RUST = "#A8482F", TEXT_MUTED = "#6B6558";
+
+  const CATEGORIES = [
+    { key: "biography", label: "Biography", goal: 5 },
+    { key: "fantasy", label: "Fantasy", goal: 5 },
+    { key: "historical", label: "Historical fiction", goal: 4 },
+    { key: "informational", label: "Informational text", goal: 5 },
+    { key: "realistic", label: "Realistic fiction", goal: 5 },
+    { key: "mystery", label: "Mystery", goal: 4 },
+    { key: "poetry", label: "Poetry", goal: 2 },
+    { key: "choice", label: "Choice", goal: 10 },
+  ];
+
+  // Full book menu for Asa (4th grade, highly capable) — from his class list.
+  const BOOK_MENU_ASA = {
+    biography: ["Who Was Albert Einstein?", "Hidden Figures (Young Readers)", "I Am Malala (Young Readers)",
+      "Steve Jobs: The Man Who Thought Different", "Brown Girl Dreaming", "Who Was Jackie Robinson?",
+      "Who Was Walt Disney?", "Who Was Anne Frank?", "Who Was Harriet Tubman?",
+      "The Boy Who Harnessed the Wind (Young Readers Edition)", "Marley Dias Gets It Done",
+      "Anne Frank: The Diary of a Young Girl"],
+    fantasy: ["The Lightning Thief", "The Sea of Monsters", "The Hobbit", "Harry Potter and the Sorcerer's Stone",
+      "The Golden Compass", "A Wizard of Earthsea", "The Wild Robot", "Ella Enchanted",
+      "The Girl Who Drank the Moon", "Inkheart", "The Lion, the Witch and the Wardrobe",
+      "The Land of Stories: The Wishing Spell"],
+    historical: ["Number the Stars", "The War That Saved My Life", "Esperanza Rising", "The Inquisitor's Tale",
+      "Bud, Not Buddy", "The Watsons Go to Birmingham—1963", "Sarah, Plain and Tall", "Johnny Tremain",
+      "Roll of Thunder, Hear My Cry", "Dead End in Norvelt"],
+    informational: ["Bomb", "Courage Has No Color", "Phineas Gage", "The Omnivore's Dilemma (Young Readers)",
+      "The Boys Who Challenged Hitler", "Chasing Lincoln's Killer", "A Black Hole Is Not a Hole",
+      "Bugged: How Insects Changed History", "Eruption! Volcanoes and the Science of Saving Lives",
+      "Kid Presidents", "Terrible Typhoid Mary", "Weird But True! (National Geographic Kids)"],
+    realistic: ["The One and Only Ivan", "Wonder", "Fish in a Tree", "Because of Winn-Dixie",
+      "Bridge to Terabithia", "Out of My Mind", "Rules", "Walk Two Moons", "Hoot", "Frindle",
+      "Front Desk", "Shiloh"],
+    mystery: ["Holes", "The Westing Game", "Chasing Vermeer", "Escape from Mr. Lemoncello's Library",
+      "From the Mixed-Up Files of Mrs. Basil E. Frankweiler", "The Mysterious Benedict Society",
+      "Encyclopedia Brown, Boy Detective", "Greenglass House", "Nancy Drew: The Secret of the Old Clock",
+      "The Puzzling World of Winston Breen"],
+    poetry: ["The Crossover", "Love That Dog", "Out of Wonder", "Where the Sidewalk Ends",
+      "Inside Out & Back Again", "Out of the Dust"],
+    choice: ["Diary of a Wimpy Kid", "Hatchet", "My Side of the Mountain", "Treasure Island", "The 39 Clues",
+      "Redwall", "The Dark Is Rising", "The Alchemyst", "The Ruins of Gorlan", "Charlotte's Web",
+      "New Kid", "El Deafo", "Smile", "James and the Giant Peach", "Matilda", "The BFG", "Artemis Fowl",
+      "The City of Ember", "A Wrinkle in Time", "The Tale of Despereaux", "Peter Pan", "The Phantom Tollbooth"],
+  };
+
+  // Bowden's (2nd grade) approved list isn't in from his teacher yet — every category
+  // starts empty so the picker just falls through to "Other (write in)". Once his list
+  // arrives, add titles here in the same format as BOOK_MENU_ASA above.
+  const BOOK_MENU_BOWDEN = {
+    biography: [], fantasy: [], historical: [], informational: [],
+    realistic: [], mystery: [], poetry: [], choice: [],
+  };
+
+  const KIDS = [
+    { key: "asa", label: "Asa", storageKey: "reading-log-asa", menu: BOOK_MENU_ASA },
+    { key: "bowden", label: "Bowden", storageKey: "reading-log-bowden", menu: BOOK_MENU_BOWDEN },
+  ];
+
+  let activeKid = KIDS[0].key;
+  let state = {}; // { [kidKey]: { entries, category, selectedBook, customTitle, doubleCount, error } }
+  KIDS.forEach((k) => {
+    let entries = [];
+    try {
+      entries = JSON.parse(localStorage.getItem(k.storageKey) || "[]");
+    } catch (e) { entries = []; }
+    state[k.key] = {
+      entries,
+      category: CATEGORIES[0].key,
+      selectedBook: (k.menu[CATEGORIES[0].key][0]) || OTHER,
+      customTitle: "",
+      doubleCount: false,
+      error: "",
+    };
+  });
+
+  let chart = null;
+
+  function weeksBetween(a, b) { return (b - a) / MS_WEEK; }
+
+  function getMonthTicks() {
+    const ticks = [];
+    let cursor = new Date(START_DATE.getFullYear(), START_DATE.getMonth() + 1, 1);
+    while (cursor < END_DATE) {
+      ticks.push({ week: Math.round(weeksBetween(START_DATE, cursor) * 10) / 10,
+        label: cursor.toLocaleDateString("en-US", { month: "short" }) });
+      cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+    }
+    ticks.push({ week: TOTAL_WEEKS, label: END_DATE.toLocaleDateString("en-US", { month: "short" }) });
+    return ticks;
+  }
+  const MONTH_TICKS = getMonthTicks();
+
+  function persist(kidKey) {
+    localStorage.setItem(KIDS.find((k) => k.key === kidKey).storageKey, JSON.stringify(state[kidKey].entries));
+  }
+
+  function addBook(kidKey) {
+    const s = state[kidKey];
+    const finalTitle = s.selectedBook === OTHER ? s.customTitle.trim() : s.selectedBook;
+    if (!finalTitle) { s.error = "Enter a book title first"; render(); return; }
+    s.error = "";
+    s.entries.push({
+      id: Date.now(), title: finalTitle, category: s.category,
+      count: s.doubleCount ? 2 : 1, date: new Date().toISOString(),
+    });
+    s.customTitle = "";
+    s.doubleCount = false;
+    persist(kidKey);
+    render();
+  }
+
+  function removeBook(kidKey, id) {
+    const s = state[kidKey];
+    s.entries = s.entries.filter((e) => e.id !== id);
+    persist(kidKey);
+    render();
+  }
+
+  function computeChartData(kidKey) {
+    const entries = state[kidKey].entries;
+    const now = new Date();
+    const currentWeek = Math.max(0, Math.min(TOTAL_WEEKS, weeksBetween(START_DATE, now)));
+    const target = [], actual = [], labels = [];
+    for (let w = 0; w <= TOTAL_WEEKS; w++) {
+      labels.push(w);
+      target.push(Math.round((w / TOTAL_WEEKS) * TOTAL_GOAL * 10) / 10);
+      const cumulativeAtWeek = entries
+        .filter((e) => weeksBetween(START_DATE, new Date(e.date)) <= w)
+        .reduce((sum, e) => sum + e.count, 0);
+      actual.push(w <= currentWeek ? cumulativeAtWeek : null);
+    }
+    return { labels, target, actual, currentWeek };
+  }
+
+  function render() {
+    const kid = KIDS.find((k) => k.key === activeKid);
+    const s = state[activeKid];
+    const totalRead = s.entries.reduce((sum, e) => sum + e.count, 0);
+    const categoryProgress = CATEGORIES.map((c) => {
+      const read = s.entries.filter((e) => e.category === c.key).reduce((sum, e) => sum + e.count, 0);
+      return { ...c, read: Math.min(read, c.goal), over: Math.max(0, read - c.goal) };
+    });
+    const { labels, target, actual, currentWeek } = computeChartData(activeKid);
+    const paceTarget = Math.round(((currentWeek / TOTAL_WEEKS) * TOTAL_GOAL) * 10) / 10;
+    const diff = Math.round((totalRead - paceTarget) * 10) / 10;
+    const weeksLeft = Math.max(0, Math.round(TOTAL_WEEKS - currentWeek));
+
+    let statusLabel = "Right on pace", statusColor = GOLD;
+    if (diff >= 1) { statusLabel = `${diff} ${diff === 1 ? "book" : "books"} ahead of pace`; statusColor = GREEN; }
+    else if (diff <= -1) { statusLabel = `${Math.abs(diff)} ${Math.abs(diff) === 1 ? "book" : "books"} behind pace`; statusColor = RUST; }
+
+    let estLabel = "Log a book to see an estimate", estColor = TEXT_MUTED;
+    if (totalRead > 0 && currentWeek >= 1) {
+      const pace = totalRead / currentWeek;
+      const weeksToFinish = TOTAL_GOAL / pace;
+      const projected = new Date(START_DATE.getTime() + weeksToFinish * MS_WEEK);
+      const diffDays = Math.round((projected - END_DATE) / (24 * 60 * 60 * 1000));
+      const dateStr = projected.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+      if (diffDays <= 0) { estLabel = `${dateStr}${diffDays < 0 ? ` (${Math.abs(diffDays)}d early)` : ""}`; estColor = GREEN; }
+      else { estLabel = `${dateStr} (${diffDays}d late)`; estColor = RUST; }
+    }
+
+    const bookOptions = kid.menu[s.category] || [];
+    const usingPlaceholderMenu = bookOptions.length === 0;
+
+    const el = document.getElementById("reading-app");
+    el.innerHTML = `
+      <div class="rt-tabs">
+        ${KIDS.map((k) => `<button class="rt-tab ${k.key === activeKid ? "active" : ""}" data-kid="${k.key}">${k.label}</button>`).join("")}
+      </div>
+      <div style="margin-bottom:1.25rem;">
+        <div class="rt-serif" style="font-size:26px;font-weight:700;letter-spacing:-0.01em;">40 Book Challenge</div>
+        <div style="font-size:14px;color:${TEXT_MUTED};margin-top:2px;">
+          Sept 14, 2026 &ndash; June 1, 2027 &middot; ${TOTAL_WEEKS} weeks &middot; ${kid.label}
+        </div>
+      </div>
+      <div class="rt-stats">
+        <div class="rt-stat"><div class="rt-stat-label">Books read</div>
+          <div class="rt-serif rt-stat-value">${totalRead}<span style="font-size:16px;color:${TEXT_MUTED};"> / ${TOTAL_GOAL}</span></div></div>
+        <div class="rt-stat"><div class="rt-stat-label">Weeks left</div>
+          <div class="rt-serif rt-stat-value">${weeksLeft}</div></div>
+        <div class="rt-stat"><div class="rt-stat-label">Status</div>
+          <div style="font-size:16px;font-weight:600;color:${statusColor};margin-top:6px;">${statusLabel}</div></div>
+        <div class="rt-stat"><div class="rt-stat-label">Est. finish</div>
+          <div style="font-size:15px;font-weight:600;color:${estColor};margin-top:6px;">${estLabel}</div></div>
+      </div>
+      <div style="height:300px;margin-bottom:0.5rem;"><canvas id="rt-chart"></canvas></div>
+      <div style="display:flex;gap:16px;font-size:13px;color:${TEXT_MUTED};margin-bottom:1.5rem;">
+        <span><span style="display:inline-block;width:10px;height:2px;background:${GOLD};margin-right:6px;vertical-align:middle;"></span>On-pace goal</span>
+        <span><span style="display:inline-block;width:10px;height:2px;background:${INK};margin-right:6px;vertical-align:middle;"></span>Books actually read</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${statusColor};margin-right:6px;vertical-align:middle;"></span>Today</span>
+      </div>
+      <div style="margin-bottom:1.5rem;">
+        <div class="rt-serif" style="font-size:17px;font-weight:700;margin-bottom:10px;">Progress by category</div>
+        ${categoryProgress.map((c) => `
+          <div class="rt-bar-row">
+            <div class="rt-bar-label">${c.label}</div>
+            <div class="rt-bar-track"><div class="rt-bar-fill" style="width:${(c.read / c.goal) * 100}%;background:${c.read >= c.goal ? GREEN : GOLD};"></div></div>
+            <div class="rt-bar-count">${c.read}/${c.goal}${c.over > 0 ? ` +${c.over}` : ""}</div>
+          </div>`).join("")}
+      </div>
+      <div style="background:#fff;border-radius:10px;padding:16px;">
+        <div class="rt-serif" style="font-size:17px;font-weight:700;margin-bottom:10px;">Log a finished book</div>
+        ${usingPlaceholderMenu ? `<div style="font-size:13px;color:${TEXT_MUTED};margin-bottom:8px;">No approved list for this category yet — type the title in below.</div>` : ""}
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
+          <select id="rt-category" style="flex:1 1 200px;">
+            ${CATEGORIES.map((c) => `<option value="${c.key}" ${c.key === s.category ? "selected" : ""}>${c.label}</option>`).join("")}
+          </select>
+          <select id="rt-book" style="flex:1 1 240px;">
+            ${bookOptions.map((b) => `<option value="${b}" ${b === s.selectedBook ? "selected" : ""}>${b}</option>`).join("")}
+            <option value="${OTHER}" ${s.selectedBook === OTHER ? "selected" : ""}>Other (write in)...</option>
+          </select>
+        </div>
+        ${s.selectedBook === OTHER ? `<input id="rt-custom" class="rt-input" style="width:100%;margin-bottom:10px;box-sizing:border-box;" placeholder="Type the book title" value="${s.customTitle.replace(/"/g, "&quot;")}" />` : ""}
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+          <label style="font-size:14px;display:flex;align-items:center;gap:8px;">
+            <input id="rt-double" class="rt-check" type="checkbox" ${s.doubleCount ? "checked" : ""} />
+            Over 300 pages (counts as 2)
+          </label>
+          <button id="rt-add" class="rt-btn">Add book</button>
+        </div>
+        ${s.error ? `<div style="color:${RUST};font-size:14px;margin-top:8px;">${s.error}</div>` : ""}
+      </div>
+      ${s.entries.length > 0 ? `
+        <div style="margin-top:1rem;">
+          <div class="rt-serif" style="font-size:15px;font-weight:700;margin-bottom:8px;">Books logged</div>
+          ${s.entries.slice().reverse().map((e) => `
+            <div class="rt-entry">
+              <span>${e.title} <span style="color:${TEXT_MUTED};">&middot; ${CATEGORIES.find((c) => c.key === e.category).label}${e.count === 2 ? " (2 books)" : ""}</span></span>
+              <button class="rt-remove" data-remove="${e.id}">Remove</button>
+            </div>`).join("")}
+        </div>` : ""}
+    `;
+
+    // wire events
+    el.querySelectorAll(".rt-tab").forEach((btn) => btn.addEventListener("click", () => { activeKid = btn.dataset.kid; render(); }));
+    el.querySelector("#rt-category").addEventListener("change", (e) => {
+      s.category = e.target.value;
+      s.selectedBook = (kid.menu[s.category][0]) || OTHER;
+      s.customTitle = "";
+      s.error = "";
+      render();
+    });
+    el.querySelector("#rt-book").addEventListener("change", (e) => { s.selectedBook = e.target.value; s.error = ""; render(); });
+    const customInput = el.querySelector("#rt-custom");
+    if (customInput) customInput.addEventListener("input", (e) => { s.customTitle = e.target.value; });
+    el.querySelector("#rt-double").addEventListener("change", (e) => { s.doubleCount = e.target.checked; });
+    el.querySelector("#rt-add").addEventListener("click", () => addBook(activeKid));
+    el.querySelectorAll("[data-remove]").forEach((btn) => btn.addEventListener("click", () => removeBook(activeKid, Number(btn.dataset.remove))));
+
+    drawChart(labels, target, actual, currentWeek, totalRead, statusColor);
+  }
+
+  function drawChart(labels, target, actual, currentWeek, totalRead, statusColor) {
+    const ctx = document.getElementById("rt-chart").getContext("2d");
+    if (chart) chart.destroy();
+    chart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          { label: "On-pace goal", data: target, borderColor: GOLD, borderDash: [5, 4], borderWidth: 2, pointRadius: 0, fill: false, tension: 0 },
+          { label: "Books actually read", data: actual, borderColor: INK, backgroundColor: "rgba(27,42,65,0.12)", borderWidth: 3, pointRadius: 2, fill: true, tension: 0.25, spanGaps: true },
+        ],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { title: (items) => `Week ${items[0].label}` } },
+        },
+        scales: {
+          x: {
+            title: { display: false },
+            grid: { display: false },
+            ticks: {
+              callback: function (value, index) {
+                const w = labels[index];
+                const monthHit = MONTH_TICKS.find((m) => Math.abs(m.week - w) < 0.6);
+                return monthHit ? monthHit.label : "";
+              },
+              autoSkip: false, maxRotation: 0, color: TEXT_MUTED, font: { size: 11, weight: "600" },
+            },
+          },
+          y: { min: 0, max: TOTAL_GOAL, ticks: { color: TEXT_MUTED, font: { size: 12 } }, grid: { color: "#D8D2C2" } },
+        },
+      },
+      plugins: [{
+        id: "todayDot",
+        afterDatasetsDraw(c) {
+          const xScale = c.scales.x, yScale = c.scales.y;
+          const x = xScale.getPixelForValue(Math.round(currentWeek));
+          const y = yScale.getPixelForValue(totalRead);
+          const ctx2 = c.ctx;
+          ctx2.save();
+          ctx2.beginPath();
+          ctx2.arc(x, y, 6, 0, Math.PI * 2);
+          ctx2.fillStyle = statusColor;
+          ctx2.strokeStyle = "#fff";
+          ctx2.lineWidth = 2;
+          ctx2.fill();
+          ctx2.stroke();
+          ctx2.font = "bold 12px system-ui";
+          ctx2.fillStyle = statusColor;
+          ctx2.textAlign = "center";
+          ctx2.fillText(`${totalRead} read`, x, y - 12);
+          ctx2.restore();
+        },
+      }],
+    });
+  }
+
+  render();
+})();
+</script>

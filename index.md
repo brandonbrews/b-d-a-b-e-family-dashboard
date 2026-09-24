@@ -170,7 +170,6 @@ title: Home
 <div class="bottom-ui">
     <div class="weather-box">
         <a class="weatherwidget-io"
-           /* href="https://forecast7.com/en/47d17n122d52/lakewood/?unit=us"  */
            data-label_1="LAKEWOOD" data-label_2="WASHINGTON"
            data-icons="Climacons Animated" data-theme="pure"
            data-basecolor="transparent" data-textcolor="#ffffff" 
