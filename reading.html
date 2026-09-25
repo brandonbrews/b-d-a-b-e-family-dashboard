@@ -5,6 +5,15 @@ permalink: /reading/
 ---
 
 <style>
+  /* Your other dashboard pages (calendar/weather/chores) are likely designed to fit one
+     screen with no scrolling — this page has more content than that, so override any
+     global no-scroll lock just for /reading/. */
+  html, body {
+    height: auto !important;
+    min-height: 100% !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
   #reading-app {
     font-family: system-ui, -apple-system, sans-serif;
     background: #FAF6EE;
@@ -12,7 +21,7 @@ permalink: /reading/
     padding: 1.75rem;
     border-radius: 16px;
     max-width: 900px;
-    margin: 0 auto;
+    margin: 0 auto 2rem auto;
   }
   #reading-app .rt-serif { font-family: Georgia, 'Times New Roman', serif; }
   #reading-app .rt-tabs { display: flex; gap: 8px; margin-bottom: 1.25rem; }
@@ -246,7 +255,7 @@ permalink: /reading/
     const el = document.getElementById("reading-app");
     if (!el) return;
     const w = window.innerWidth || document.documentElement.clientWidth;
-    const z = Math.max(0.85, Math.min(2.4, w / 950));
+    const z = Math.max(0.85, Math.min(1.5, w / 1300));
     el.style.zoom = z;
   }
   let zoomResizeTimer = null;
