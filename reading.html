@@ -176,9 +176,32 @@ permalink: /reading/
       proxyURL(`/${SHEET_ID}/values/${READING_LOG_TAB}!A1:append`, "valueInputOption=USER_ENTERED"),
       { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ values: [row] }) }
     );
+    const text = await res.text();
     if (!res.ok) {
-      console.error("Sheets append failed:", res.status, await res.text());
+      console.error("Sheets append failed:", res.status, text);
       throw new Error("Sheets append failed: " + res.status);
+    }
+    // Google returns updates.updatedRange like "ReadingLog!A5:E5" — pull the row number
+    // out of it so we can target this exact row later if it needs to be removed.
+    try {
+      const data = JSON.parse(text);
+      const range = data.updates && data.updates.updatedRange;
+      const afterBang = range && range.split("!")[1];
+      const match = afterBang && afterBang.match(/\d+/);
+      return match ? Number(match[0]) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async function sheetsClearRow(row) {
+    const res = await fetch(
+      proxyURL(`/${SHEET_ID}/values/${READING_LOG_TAB}!A${row}:E${row}:clear`),
+      { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }
+    );
+    if (!res.ok) {
+      console.error("Sheets clear failed:", res.status, await res.text());
+      throw new Error("Sheets clear failed: " + res.status);
     }
   }
 
@@ -214,6 +237,24 @@ permalink: /reading/
 
   let chart = null;
 
+  // The design was built at ~950px wide. CSS zoom scales the whole widget — text,
+  // buttons, spacing, and the chart canvas together — to whatever screen it's on,
+  // rather than needing every size rewritten as a relative unit. `zoom` isn't in every
+  // browser (Firefox lagged for years) but both target devices here are Chromium-based
+  // (the dashboard touchscreen and Chrome on a Chromebook), so it's a safe bet.
+  function applyZoom() {
+    const el = document.getElementById("reading-app");
+    if (!el) return;
+    const w = window.innerWidth || document.documentElement.clientWidth;
+    const z = Math.max(0.85, Math.min(2.4, w / 950));
+    el.style.zoom = z;
+  }
+  let zoomResizeTimer = null;
+  window.addEventListener("resize", () => {
+    clearTimeout(zoomResizeTimer);
+    zoomResizeTimer = setTimeout(applyZoom, 150);
+  });
+
   function weeksBetween(a, b) { return (b - a) / MS_WEEK; }
 
   function getMonthTicks() {
@@ -234,11 +275,14 @@ permalink: /reading/
   }
 
   function rowsToEntries(rows, kidLabel) {
-    // rows: [Date, Kid, Category, Title, Count]
+    // rows: [Date, Kid, Category, Title, Count] — row index (1-based) doubles as the
+    // sheet row number so we can target it later for removal.
     return rows
-      .filter((r) => r[1] === kidLabel)
-      .map((r, i) => ({
-        id: `sheet-${i}-${r[0]}`,
+      .map((r, i) => ({ sheetRow: i + 1, r }))
+      .filter(({ r }) => r[1] === kidLabel)
+      .map(({ sheetRow, r }) => ({
+        id: `sheet-${sheetRow}`,
+        sheetRow,
         date: r[0],
         title: r[3],
         category: CATEGORIES.find((c) => c.label === r[2])?.key || "choice",
@@ -278,7 +322,7 @@ permalink: /reading/
     const categoryLabel = CATEGORIES.find((c) => c.key === s.category).label;
     const count = s.doubleCount ? 2 : 1;
     const dateStr = new Date().toISOString();
-    const entry = { id: Date.now(), title: finalTitle, category: s.category, count, date: dateStr };
+    const entry = { id: `local-${Date.now()}`, title: finalTitle, category: s.category, count, date: dateStr, sheetRow: null };
     s.entries.push(entry);
     s.customTitle = "";
     s.doubleCount = false;
@@ -289,7 +333,9 @@ permalink: /reading/
     try {
       syncStatus = "Saving…";
       render();
-      await sheetsAppendRow([dateStr, kid.label, categoryLabel, finalTitle, count]);
+      const sheetRow = await sheetsAppendRow([dateStr, kid.label, categoryLabel, finalTitle, count]);
+      entry.sheetRow = sheetRow;
+      persist(kidKey);
       const newTotal = s.entries.reduce((sum, e) => sum + e.count, 0);
       await sheetsUpdateKidTotal(kid, newTotal);
       syncStatus = "";
@@ -299,12 +345,25 @@ permalink: /reading/
     render();
   }
 
-  function removeBook(kidKey, id) {
-    // Removing a book only affects the local device copy — the sheet is treated as
-    // the source of truth for history, so undo a mis-logged book directly in the sheet.
+  async function removeBook(kidKey, id) {
+    const kid = KIDS.find((k) => k.key === kidKey);
     const s = state[kidKey];
+    const entry = s.entries.find((e) => e.id === id);
     s.entries = s.entries.filter((e) => e.id !== id);
     persist(kidKey);
+    render();
+
+    if (!entry || !entry.sheetRow || SHEET_ID === "REPLACE_WITH_YOUR_SHEET_ID") return;
+    try {
+      syncStatus = "Removing…";
+      render();
+      await sheetsClearRow(entry.sheetRow);
+      const newTotal = s.entries.reduce((sum, e) => sum + e.count, 0);
+      await sheetsUpdateKidTotal(kid, newTotal);
+      syncStatus = "";
+    } catch (e) {
+      syncStatus = "Removed locally — couldn't update the sheet, clear that row manually if needed";
+    }
     render();
   }
 
@@ -417,7 +476,7 @@ permalink: /reading/
       ${s.entries.length > 0 ? `
         <div style="margin-top:1rem;">
           <div class="rt-serif" style="font-size:15px;font-weight:700;margin-bottom:2px;">Books logged</div>
-          <div style="font-size:12px;color:${TEXT_MUTED};margin-bottom:8px;">Remove only clears this device's copy — to undo a sheet entry, delete its row in the ReadingLog tab.</div>
+          <div style="font-size:12px;color:${TEXT_MUTED};margin-bottom:8px;">Remove also clears that row in the sheet (leaves it blank rather than reordering everything below it).</div>
           ${s.entries.slice().reverse().map((e) => `
             <div class="rt-entry">
               <span>${e.title} <span style="color:${TEXT_MUTED};">&middot; ${CATEGORIES.find((c) => c.key === e.category).label}${e.count === 2 ? " (2 books)" : ""}</span></span>
@@ -440,7 +499,7 @@ permalink: /reading/
     if (customInput) customInput.addEventListener("input", (e) => { s.customTitle = e.target.value; });
     el.querySelector("#rt-double").addEventListener("change", (e) => { s.doubleCount = e.target.checked; });
     el.querySelector("#rt-add").addEventListener("click", () => addBook(activeKid));
-    el.querySelectorAll("[data-remove]").forEach((btn) => btn.addEventListener("click", () => removeBook(activeKid, Number(btn.dataset.remove))));
+    el.querySelectorAll("[data-remove]").forEach((btn) => btn.addEventListener("click", () => removeBook(activeKid, btn.dataset.remove)));
 
     try {
       drawChart(labels, target, actual, currentWeek, totalRead, statusColor);
@@ -508,6 +567,7 @@ permalink: /reading/
     });
   }
 
+  applyZoom();
   render();
   loadFromSheet();
 })();
