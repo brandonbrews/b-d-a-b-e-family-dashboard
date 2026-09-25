@@ -162,26 +162,35 @@ permalink: /reading/
   }
 
   async function sheetsFetchAll() {
-    const res = await fetch(proxyURL(`${SHEET_ID}/values/${READING_LOG_RANGE}`));
-    if (!res.ok) throw new Error("Sheets read failed: " + res.status);
+    const res = await fetch(proxyURL(`/${SHEET_ID}/values/${READING_LOG_RANGE}`));
+    if (!res.ok) {
+      console.error("Sheets read failed:", res.status, await res.text());
+      throw new Error("Sheets read failed: " + res.status);
+    }
     const data = await res.json();
     return data.values || [];
   }
 
   async function sheetsAppendRow(row) {
     const res = await fetch(
-      proxyURL(`${SHEET_ID}/values/${READING_LOG_TAB}!A1:append`, "valueInputOption=USER_ENTERED"),
+      proxyURL(`/${SHEET_ID}/values/${READING_LOG_TAB}!A1:append`, "valueInputOption=USER_ENTERED"),
       { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ values: [row] }) }
     );
-    if (!res.ok) throw new Error("Sheets append failed: " + res.status);
+    if (!res.ok) {
+      console.error("Sheets append failed:", res.status, await res.text());
+      throw new Error("Sheets append failed: " + res.status);
+    }
   }
 
   async function sheetsUpdateKidTotal(kid, total) {
     const res = await fetch(
-      proxyURL(`${SHEET_ID}/values/${KIDS_SHEET}!C${kid.sheetRow}`, "valueInputOption=USER_ENTERED"),
+      proxyURL(`/${SHEET_ID}/values/${KIDS_SHEET}!C${kid.sheetRow}`, "valueInputOption=USER_ENTERED"),
       { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ values: [[total]] }) }
     );
-    if (!res.ok) throw new Error("Sheets total update failed: " + res.status);
+    if (!res.ok) {
+      console.error("Sheets total update failed:", res.status, await res.text());
+      throw new Error("Sheets total update failed: " + res.status);
+    }
   }
 
   let syncStatus = ""; // shown as a small line under the title
