@@ -219,9 +219,29 @@ title: Upload Photos
     var uploadPassword = sessionStorage.getItem('upload-pw') || '';
 
     /* ── Auth: the Worker checks the password when you upload ── */
-    function checkPassword() {
+        async function checkPassword() {
         var pw = document.getElementById('pw-input').value;
         if (!pw) return;
+        var err = document.getElementById('auth-error');
+        err.textContent = 'Checking…';
+        try {
+            var r = await fetch(PROXY_BASE + '/upload-sign', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: pw, album: selectedAlbum || 'main' })
+            });
+            if (r.status === 401) {
+                err.textContent = 'Incorrect password — try again.';
+                document.getElementById('pw-input').value = '';
+                document.getElementById('pw-input').focus();
+                return;
+            }
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+        } catch (e) {
+            err.textContent = 'Could not reach the server — try again.';
+            return;
+        }
+        err.textContent = '';
         uploadPassword = pw;
         sessionStorage.setItem('upload-pw', pw);
         showMain();
