@@ -29,8 +29,6 @@ weather_label_2:   "WASHINGTON"
 cloudinary_cloud:             "dybmaxwvb"
 cloudinary_folder:            "DBABE"
 cloudinary_folder_bonus:      "DBABE-bonus-album"
-cloudinary_upload_preset:     "DBABE-upload"
-cloudinary_upload_preset_bonus: "DBABE-bonus-album"
 cloudinary_tag:               "DBABE"
 
 # ── Background options ───────────────────────
@@ -50,9 +48,3 @@ show_upload:       false
 show_reading:      true             # 40 Book Challenge tracker
 
 calendar_type:     "google"
-
-# ── Upload page ──────────────────────────────
-upload_password:   "7117"
-
-# ── Unsplash ─────────────────────────────────
-unsplash_key:      "uVlnR0MpCzzax-Zw8ViI6VOCJuo4z6H0G41lnZUgrWI"
