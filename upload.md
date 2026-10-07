@@ -141,6 +141,7 @@ title: Upload Photos
                placeholder="Enter password"
                onkeydown="if(event.key==='Enter') checkPassword()">
         <button class="btn-primary" onclick="checkPassword()">Unlock</button>
+        <div style="color:rgba(255,255,255,0.4);font-size:0.85rem;margin-top:12px">Hint: Lk Steil Blvd</div>
         <div id="auth-error" style="color:#ff6b6b;font-size:0.85rem;margin-top:12px;min-height:1.2em"></div>
     </div>
 
@@ -188,60 +189,62 @@ title: Upload Photos
 </div>
 
 <script>
-    /* ── Jekyll config injection ───────────────────────────────── */
-    var CORRECT_PASSWORD = '{{ site.upload_password }}';
-    var CLOUDINARY_CLOUD = '{{ site.cloudinary_cloud }}';
+    var PROXY_BASE = 'https://sheets-proxy.brandonhorn.workers.dev';
 
     /*
-     * ALBUMS: each entry has a display name, description, emoji, and
-     * the Cloudinary upload preset that targets that folder.
-     * Single-entry = selector hidden, behaves exactly like before.
+     * ALBUMS: 'key' tells the Worker which album to sign for.
+     * Single-entry = selector hidden.
      */
     var ALBUMS = [
-        {% if site.cloudinary_upload_preset and site.cloudinary_upload_preset != '' %}
+        {% if site.cloudinary_folder and site.cloudinary_folder != '' %}
         {
-            name:    "{{ site.cloudinary_folder | replace: '-', ' ' | capitalize }}",
-            desc:    "Main family photos",
-            icon:    "🏠",
-            preset:  "{{ site.cloudinary_upload_preset }}"
-        }{% if site.cloudinary_upload_preset_bonus and site.cloudinary_upload_preset_bonus != '' %},{% endif %}
+            key:  "main",
+            name: "{{ site.cloudinary_folder | replace: '-', ' ' | capitalize }}",
+            desc: "Main family photos",
+            icon: "🏠"
+        }{% if site.cloudinary_folder_bonus and site.cloudinary_folder_bonus != '' %},{% endif %}
         {% endif %}
-        {% if site.cloudinary_upload_preset_bonus and site.cloudinary_upload_preset_bonus != '' %}
+        {% if site.cloudinary_folder_bonus and site.cloudinary_folder_bonus != '' %}
         {
-            name:    "{{ site.cloudinary_folder_bonus | replace: '-', ' ' | capitalize }}",
-            desc:    "Bonus album",
-            icon:    "⭐",
-            preset:  "{{ site.cloudinary_upload_preset_bonus }}"
+            key:  "bonus",
+            name: "{{ site.cloudinary_folder_bonus | replace: '-', ' ' | capitalize }}",
+            desc: "Bonus album",
+            icon: "⭐"
         }
         {% endif %}
     ];
-    /* ─────────────────────────────────────────────────────────── */
 
-    var selectedFiles  = [];
-    var selectedPreset = ALBUMS.length > 0 ? ALBUMS[0].preset : '';
+    var selectedFiles = [];
+    var selectedAlbum = ALBUMS.length > 0 ? ALBUMS[0].key : '';
+    var uploadPassword = sessionStorage.getItem('upload-pw') || '';
 
-    /* ── Auth ── */
+    /* ── Auth: the Worker checks the password when you upload ── */
     function checkPassword() {
-        if (document.getElementById('pw-input').value === CORRECT_PASSWORD) {
-            document.getElementById('auth-screen').style.display = 'none';
-            document.getElementById('main-screen').style.display = 'block';
-            sessionStorage.setItem('upload-auth', '1');
-            buildAlbumSelector();
-        } else {
-            document.getElementById('auth-error').textContent = 'Incorrect password — try again.';
-            document.getElementById('pw-input').value = '';
-            document.getElementById('pw-input').focus();
-        }
+        var pw = document.getElementById('pw-input').value;
+        if (!pw) return;
+        uploadPassword = pw;
+        sessionStorage.setItem('upload-pw', pw);
+        showMain();
     }
-    if (sessionStorage.getItem('upload-auth') === '1') {
+    function showMain() {
         document.getElementById('auth-screen').style.display = 'none';
         document.getElementById('main-screen').style.display = 'block';
         buildAlbumSelector();
     }
+    function showAuth(msg) {
+        sessionStorage.removeItem('upload-pw');
+        uploadPassword = '';
+        document.getElementById('main-screen').style.display = 'none';
+        document.getElementById('auth-screen').style.display = 'block';
+        document.getElementById('auth-error').textContent = msg || '';
+        document.getElementById('pw-input').value = '';
+        document.getElementById('pw-input').focus();
+    }
+    if (uploadPassword) showMain();
 
     /* ── Album selector ── */
     function buildAlbumSelector() {
-        if (ALBUMS.length <= 1) return; // hide if only one album
+        if (ALBUMS.length <= 1) return;
         var wrap = document.getElementById('album-selector');
         var opts = document.getElementById('album-options');
         wrap.style.display = 'block';
@@ -249,7 +252,6 @@ title: Upload Photos
         ALBUMS.forEach(function(album, i) {
             var div = document.createElement('div');
             div.className = 'album-option' + (i === 0 ? ' selected' : '');
-            div.dataset.preset = album.preset;
             div.innerHTML =
                 '<div class="album-icon">' + album.icon + '</div>'
               + '<div class="album-text">'
@@ -257,19 +259,20 @@ title: Upload Photos
               +   '<div class="album-desc">' + album.desc + '</div>'
               + '</div>'
               + '<div class="album-check">' + (i === 0 ? '✓' : '') + '</div>';
-            div.addEventListener('click', function() { selectAlbum(div, album.preset); });
+            div.addEventListener('click', function() { selectAlbum(div, album.key); });
             opts.appendChild(div);
         });
+        selectedAlbum = ALBUMS[0].key;
     }
 
-    function selectAlbum(el, preset) {
+    function selectAlbum(el, key) {
         document.querySelectorAll('.album-option').forEach(function(o) {
             o.classList.remove('selected');
             o.querySelector('.album-check').textContent = '';
         });
         el.classList.add('selected');
         el.querySelector('.album-check').textContent = '✓';
-        selectedPreset = preset;
+        selectedAlbum = key;
     }
 
     /* ── File handling ── */
@@ -306,7 +309,7 @@ title: Upload Photos
 
     /* ── Upload ── */
     async function startUpload() {
-        if (!selectedFiles.length || !selectedPreset) return;
+        if (!selectedFiles.length || !selectedAlbum) return;
         var btn = document.getElementById('upload-btn');
         btn.disabled = true; btn.textContent = 'Uploading…';
         document.getElementById('progress-wrap').style.display = 'block';
@@ -315,9 +318,14 @@ title: Upload Photos
         for (var i = 0; i < selectedFiles.length; i++) {
             setStatus('Uploading ' + (i+1) + ' of ' + selectedFiles.length + '…');
             setFileStatus(i, '⏳');
-            var ok = await uploadOne(selectedFiles[i]);
-            if (ok) { uploaded++; setFileStatus(i, '✅'); }
-            else    { failed++;   setFileStatus(i, '❌'); }
+            var result = await uploadOne(selectedFiles[i]);
+            if (result === 'auth') {
+                btn.textContent = 'Upload Photos';
+                showAuth('Incorrect password — try again.');
+                return;
+            }
+            if (result === true) { uploaded++; setFileStatus(i, '✅'); }
+            else                 { failed++;   setFileStatus(i, '❌'); }
             document.getElementById('progress-bar').style.width =
                 Math.round(((i+1) / selectedFiles.length) * 100) + '%';
         }
@@ -332,12 +340,23 @@ title: Upload Photos
     }
 
     async function uploadOne(file) {
-        var fd = new FormData();
-        fd.append('file', file);
-        fd.append('upload_preset', selectedPreset);
         try {
+            var s = await fetch(PROXY_BASE + '/upload-sign', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: uploadPassword, album: selectedAlbum })
+            });
+            if (s.status === 401) return 'auth';
+            if (!s.ok) throw new Error('Signing failed: HTTP ' + s.status);
+            var p = await s.json();
+
+            var fd = new FormData();
+            fd.append('file', file);
+            ['api_key', 'timestamp', 'signature', 'upload_preset'].forEach(function(k) {
+                fd.append(k, p[k]);
+            });
             var resp = await fetch(
-                'https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD + '/image/upload',
+                'https://api.cloudinary.com/v1_1/' + p.cloud_name + '/image/upload',
                 { method: 'POST', body: fd }
             );
             if (!resp.ok) throw new Error('HTTP ' + resp.status);

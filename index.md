@@ -380,44 +380,41 @@ title: Home
         document.getElementById('nature-caption').classList.remove('visible');
     }
 
-    /* ── Unsplash daily nature ── */
-    async function fetchNature() {
-        var today    = new Date();
-        var cacheKey = 'nature-'+today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-        var cached   = sessionStorage.getItem(cacheKey);
-        if (cached) {
-            var d = JSON.parse(cached);
-            applyBackground(d.url);
-            showCaption(d.loc,d.desc,d.name,d.userUrl,d.photoUrl);
-            return;
-        }
-        if (!UNSPLASH_KEY || UNSPLASH_KEY === 'uVlnR0MpCzzax-Zw8ViI6VOCJuo4z6H0G41lnZUgrWI') {
-            applyBackground('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=2560&auto=format&fit=crop');
-            showCaption('Daily Nature','Add unsplash_key to _config.yml','','','');
-            return;
-        }
-        try {
-            var resp = await fetch('https://api.unsplash.com/photos/random'
-                +'?query=nature+landscape+scenic&orientation=landscape'
-                +'&content_filter=high&client_id='+UNSPLASH_KEY);
-            if (!resp.ok) throw new Error(resp.status);
-            var p = await resp.json();
-            var d = {
-                url:     p.urls.raw+'&w=2560&q=85&fit=crop&auto=format',
-                loc:     (p.location&&(p.location.name||p.location.city||p.location.country))||'',
-                desc:    (p.description||p.alt_description||'').substring(0,80),
-                name:    p.user.name,
-                userUrl: p.user.links.html+'?utm_source=family_dashboard&utm_medium=referral',
-                photoUrl:p.links.html+'?utm_source=family_dashboard&utm_medium=referral'
-            };
-            sessionStorage.setItem(cacheKey, JSON.stringify(d));
-            applyBackground(d.url);
-            showCaption(d.loc,d.desc,d.name,d.userUrl,d.photoUrl);
-        } catch(e) {
-            console.warn('Unsplash error:',e);
-            applyBackground('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=2560&auto=format&fit=crop');
-        }
+   /* ── Unsplash daily nature (via Cloudflare Worker) ── */
+async function fetchNature() {
+    var NATURE_PROXY = 'https://sheets-proxy.brandonhorn.workers.dev';
+    var FALLBACK_BG  = 'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=2560&auto=format&fit=crop';
+    var today    = new Date();
+    var cacheKey = 'nature-' + today.getFullYear() + '-' + (today.getMonth()+1) + '-' + today.getDate();
+    var cached   = sessionStorage.getItem(cacheKey);
+    if (cached) {
+        var c = JSON.parse(cached);
+        applyBackground(c.url);
+        showCaption(c.loc, c.desc, c.name, c.userUrl, c.photoUrl);
+        return;
     }
+    try {
+        var resp = await fetch(NATURE_PROXY + '/unsplash');
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        var data  = await resp.json();
+        var photo = Array.isArray(data) ? data[0] : data;
+        var entry = {
+            url:      photo.urls.raw + '&w=2560&q=80&auto=format&fit=crop',
+            loc:      (photo.location && photo.location.name) || 'Daily Nature',
+            desc:     photo.description || photo.alt_description || '',
+            name:     photo.user.name,
+            userUrl:  photo.user.links.html,
+            photoUrl: photo.links.html
+        };
+        sessionStorage.setItem(cacheKey, JSON.stringify(entry));
+        applyBackground(entry.url);
+        showCaption(entry.loc, entry.desc, entry.name, entry.userUrl, entry.photoUrl);
+    } catch (e) {
+        console.error('Nature fetch failed:', e);
+        applyBackground(FALLBACK_BG);
+        showCaption('Daily Nature', "Could not load today's photo", '', '', '');
+    }
+}
 
     /* ── Mode selector ── */
     function setMode(mode) {
