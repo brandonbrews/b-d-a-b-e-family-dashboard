@@ -190,6 +190,7 @@ title: Upload Photos
 
 <script>
     var PROXY_BASE = 'https://sheets-proxy.brandonhorn.workers.dev';
+    var UPLOAD_SITE = '{{ site.upload_site | default: "horn" }}';
 
     /*
      * ALBUMS: 'key' tells the Worker which album to sign for.
@@ -228,7 +229,7 @@ title: Upload Photos
             var r = await fetch(PROXY_BASE + '/upload-sign', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password: pw, album: selectedAlbum || 'main' })
+                body: JSON.stringify({ password: pw, site: UPLOAD_SITE, album: selectedAlbum || 'main' })
             });
             if (r.status === 401) {
                 err.textContent = 'Incorrect password — try again.';
@@ -364,7 +365,7 @@ title: Upload Photos
             var s = await fetch(PROXY_BASE + '/upload-sign', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password: uploadPassword, album: selectedAlbum })
+                body: JSON.stringify({ password: uploadPassword, site: UPLOAD_SITE, album: selectedAlbum })
             });
             if (s.status === 401) return 'auth';
             if (!s.ok) throw new Error('Signing failed: HTTP ' + s.status);
