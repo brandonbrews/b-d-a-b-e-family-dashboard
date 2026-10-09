@@ -329,11 +329,34 @@ title: Upload Photos
     }
 
     /* ── Upload ── */
+      /* ── Keep the screen awake and guard against leaving mid-upload ── */
+    var wakeLock = null;
+    var uploading = false;
+
+    async function keepAwake() {
+        try {
+            if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen');
+        } catch (e) { /* unsupported or denied: upload still works */ }
+    }
+    function releaseAwake() {
+        try { if (wakeLock) wakeLock.release(); } catch (e) {}
+        wakeLock = null;
+    }
+    /* The browser drops the wake lock when the tab is hidden, so re-request it on return */
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible' && uploading) keepAwake();
+    });
+    window.addEventListener('beforeunload', function(e) {
+        if (uploading) { e.preventDefault(); e.returnValue = ''; }
+    });
+
     async function startUpload() {
         if (!selectedFiles.length || !selectedAlbum) return;
         var btn = document.getElementById('upload-btn');
         btn.disabled = true; btn.textContent = 'Uploading…';
         document.getElementById('progress-wrap').style.display = 'block';
+        uploading = true;
+        await keepAwake();
 
         var uploaded = 0, failed = 0;
         for (var i = 0; i < selectedFiles.length; i++) {
@@ -341,6 +364,7 @@ title: Upload Photos
             setFileStatus(i, '⏳');
             var result = await uploadOne(selectedFiles[i]);
             if (result === 'auth') {
+                uploading = false; releaseAwake();
                 btn.textContent = 'Upload Photos';
                 showAuth('Incorrect password — try again.');
                 return;
@@ -351,6 +375,7 @@ title: Upload Photos
                 Math.round(((i+1) / selectedFiles.length) * 100) + '%';
         }
 
+        uploading = false; releaseAwake();
         btn.textContent = 'Upload Photos';
         if (failed === 0) {
             setStatus('🎉 ' + uploaded + ' photo' + (uploaded > 1 ? 's' : '') + ' uploaded!', 'success');

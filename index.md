@@ -79,6 +79,7 @@ title: Home
         width: 380px; background: rgba(0,0,0,0.4); backdrop-filter: blur(15px);
         padding: 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
     }
+    .weather-box, .weather-box * { pointer-events: none !important; }
     .clock-box { text-align: right; text-shadow: 0 4px 20px rgba(0,0,0,0.5); }
     #time-display {
         font-size: 10rem; font-weight: 900; line-height: 0.8;
@@ -207,7 +208,6 @@ title: Home
     var FOLDER       = '{{ site.cloudinary_folder }}';
     var FOLDER_BONUS = '{{ site.cloudinary_folder_bonus }}';
     var TAG          = '{{ site.cloudinary_tag }}';
-    var UNSPLASH_KEY = '{{ site.unsplash_key }}';
     var BG_MODES     = {{ site.bg_modes | jsonify }};
     var BASE_URL     = '{{ site.baseurl }}';
 

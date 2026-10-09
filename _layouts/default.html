@@ -130,10 +130,11 @@
             var BASE         = '{{ site.baseurl }}';
             var HOME         = BASE + '/';
 
-            /* Don't run the idle timer on the homepage itself */
+            /* Don't run the idle timer on the homepage or the upload page */
             if (window.location.pathname === HOME ||
                 window.location.pathname === BASE  ||
-                window.location.pathname === BASE + '/index.html') return;
+                window.location.pathname === BASE + '/index.html' ||
+                window.location.pathname.indexOf('/upload') !== -1) return;
 
             var idleTimer    = null;
             var warningTimer = null;
